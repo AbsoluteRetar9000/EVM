@@ -366,4 +366,4 @@ def main():
     st.markdown("*SMBA School Elections - Portable Electronic Voting System*")
 
 if __name__ == "__main__":
-    main() 
+    main()
