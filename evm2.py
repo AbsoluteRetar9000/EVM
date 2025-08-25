@@ -106,6 +106,20 @@ def voting_interface():
     st.header("🗳️ Electronic Voting Machine")
     st.subheader("SMBA School Elections")
     
+    # Initialize session state for voting completion
+    if 'voting_completed' not in st.session_state:
+        st.session_state.voting_completed = False
+    
+    # Check if voting was just completed
+    if st.session_state.voting_completed:
+        st.success("🎉 Thank you for voting!")
+        st.info("Your votes have been recorded successfully.")
+        st.markdown("---")
+        if st.button("Start New Voting Session", type="primary"):
+            st.session_state.voting_completed = False
+            st.rerun()
+        return
+    
     # Voter ID input
     voter_id = st.text_input("Enter your Voter ID:", placeholder="e.g., STU001, TCH001, etc.")
     
@@ -139,6 +153,21 @@ def voting_interface():
     # Display voting interface for each position
     st.subheader("Select Candidates for Each Position")
     
+    # Count how many positions this voter has already voted for
+    voted_positions = 0
+    total_positions_with_candidates = 0
+    
+    for position in candidates:
+        if candidates[position]:  # Only count positions that have candidates
+            total_positions_with_candidates += 1
+            if has_voter_voted_for_position(voter_id, position):
+                voted_positions += 1
+    
+    # Show voting progress
+    if total_positions_with_candidates > 0:
+        st.progress(voted_positions / total_positions_with_candidates)
+        st.caption(f"Progress: {voted_positions}/{total_positions_with_candidates} positions voted")
+    
     votes_cast = 0
     
     for position in candidates:
@@ -169,6 +198,18 @@ def voting_interface():
     
     if votes_cast > 0:
         st.balloons()
+    
+    # Complete Voting Button (always show at the bottom)
+    st.markdown("---")
+    st.subheader("Finish Voting")
+    
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.write("Click the button below when you're done voting to return to the main menu.")
+    with col2:
+        if st.button("🏁 Complete Voting", type="primary", key="complete_voting"):
+            st.session_state.voting_completed = True
+            st.rerun()
 
 def admin_panel():
     st.header("🔧 Admin Panel")
