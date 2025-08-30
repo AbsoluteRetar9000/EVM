@@ -19,7 +19,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 def initialize_data_files():
     if not os.path.exists(CANDIDATES_FILE):
         initial_candidates = {
-            "Chief Minister": [],
+            "Chief Minister": ["Aryaa Naik"],
             "Deputy Chief Minister": [],
             "Home Minister (Boys)": [],
             "Home Minister (Girls)": [],
@@ -407,4 +407,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
