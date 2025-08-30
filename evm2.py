@@ -19,16 +19,16 @@ os.makedirs(DATA_DIR, exist_ok=True)
 def initialize_data_files():
     if not os.path.exists(CANDIDATES_FILE):
         initial_candidates = {
-            "Position 1": [],
-            "Position 2": [],
-            "Position 3": [],
-            "Position 4": [],
-            "Position 5": [],
-            "Position 6": [],
-            "Position 7": [],
-            "Position 8": [],
-            "Position 9": [],
-            "Position 10": []
+            "Chief Minister": [],
+            "Deputy Chief Minister": [],
+            "Home Minister (Boys)": [],
+            "Home Minister (Girls)": [],
+            "Cultural Minister (Boys)": [],
+            "Cultural Minister (Girls)": [],
+            "Sports Minister (Boys)": [],
+            "Sports Minister (Girls)": [],
+            "Health and Discipline Minister (Boys)": [],
+            "Health and Discipline Minister (Girls)": []
         }
         save_json(CANDIDATES_FILE, initial_candidates)
     
@@ -391,7 +391,6 @@ def main():
     
     # Main title
     st.title("🏫 SMBA School Electronic Voting Machine")
-    st.caption("Standalone Version - No Database Required")
     
     # Navigation
     tab1, tab2 = st.tabs(["🗳️ Vote", "🔧 Admin Panel"])
@@ -408,3 +407,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
