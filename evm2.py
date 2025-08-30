@@ -19,16 +19,16 @@ os.makedirs(DATA_DIR, exist_ok=True)
 def initialize_data_files():
     if not os.path.exists(CANDIDATES_FILE):
         initial_candidates = {
-            "Chief Minister": ["Arya Naik (Yuva Shakti)", "Virendrasinh CHavan(True Companions)"],
-            "Deputy Chief Minister": [],
-            "Home Minister (Boys)": [],
-            "Home Minister (Girls)": [],
-            "Cultural Minister (Boys)": [],
-            "Cultural Minister (Girls)": [],
-            "Sports Minister (Boys)": [],
-            "Sports Minister (Girls)": [],
-            "Health and Discipline Minister (Boys)": [],
-            "Health and Discipline Minister (Girls)": []
+            "Chief Minister": ["Arya Naik (Yuva Shakti)", "Virendrasinh Chavan (True Companions)"],
+            "Deputy Chief Minister": ["Saee Jitkar(Justice League)", "Ishita Kamble(True Companions)", "Saee Thakur (Yuva Shakti)"],
+            "Home Minister (Boys)": ["Aadish Charate (Swastik Sena)", "Advit Katyare (True Companions)", "Aaditya Bandekar (Yuva Shakti)"],
+            "Home Minister (Girls)": ["Sai Raut (True Companions)", "Sanvi Bagal(Justice League)", "Arushi Patil"],
+            "Cultural Minister (Boys)": ["Tanishk Khandekar (True Companions)", "Sharvil Rege (Yuva  Shakti)"],
+            "Cultural Minister (Girls)": ["Isha Deshpande (Justice League)", "Ayushi Dalvi (True Companions)", "Ritika Magdum (Yuva Shakti)"],
+            "Sports Minister (Boys)": ["Noman Peerjade (True Companions)", "Indranil Velhal (Yuva Shakti)"],
+            "Sports Minister (Girls)": ["Shourya Takkalki (Justice League)", "Angha Borate (True Companions)", "Aryaa Patil (Yuva Shakti)"],
+            "Health and Discipline Minister (Boys)": ["Ali Shaikhlal (True Companions)", "Jinay Mehta (Yuva Shakti)"],
+            "Health and Discipline Minister (Girls)": ["Samruddhi Patil (Justice League)", "Maitrayi Bhosle (True Companions)", "Avani Chougule (Yuva Shakti)"]
         }
         save_json(CANDIDATES_FILE, initial_candidates)
     
@@ -407,6 +407,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
