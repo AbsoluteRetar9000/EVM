@@ -57,6 +57,17 @@ def load_candidates():
 def save_candidates(candidates):
     save_json(CANDIDATES_FILE, candidates)
 
+def load_candidate_symbols():
+    if os.path.exists("candidate_symbols.json"):
+        with open("candidate_symbols.json", "r") as f:
+            return json.load(f)
+    return {}
+
+def save_candidate_symbols(symbols):
+    with open("candidate_symbols.json", "w") as f:
+        json.dump(symbols, f, indent=4)
+
+
 def load_votes():
     return load_json(VOTES_FILE)
 
@@ -489,6 +500,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
