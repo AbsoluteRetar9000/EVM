@@ -187,34 +187,32 @@ def voting_interface():
     
     candidates = load_candidates()
     symbols = load_candidate_symbols()
-    
-    st.subheader("Select Candidates for Each Position")
-    
-    for position in candidates:
-        if not candidates[position]:
-            st.warning(f"No candidates available for {position}")
-            continue
-        
-        st.markdown(f"### {position}")
-        
-        if has_voter_voted_for_position(voter_id, position):
-            st.success(f"✅ You have already voted for {position}")
-            continue
-        
-        options = candidates[position] + ["Skip this position"]
-        selected_candidate = st.radio(
-            label="",
-            options=options,
-            key=f"{position}_choice"
-        )
-        
-        # show images inline
-        cols = st.columns(len(options))
-        for i, cand in enumerate(candidates[position]):
-            with cols[i]:
-                st.write(cand)
-                if cand in symbols:
-                    st.image(symbols[cand], width=60)
+st.write(f"### Select your {position}")
+
+# Candidate options + skip
+options = candidates[position] + ["Skip this position"]
+
+# One radio for the entire position
+selected_candidate = st.radio(
+    label="",                  # hide label
+    options=options,
+    key=f"{position}_choice"
+)
+
+# Now display each candidate row with image
+for cand in options:
+    col1, col2 = st.columns([6, 1])
+    with col1:
+        # Show candidate with radio-like marker
+        marker = "✅" if cand == selected_candidate else "⬜"
+        if cand != "Skip this position":
+            st.markdown(f"{marker} **{cand}**")
+        else:
+            st.markdown(f"{marker} *{cand}*")
+    with col2:
+        if cand in symbols:
+            st.image(symbols[cand], width=60)
+
         
         # save choice temporarily
         if st.button(f"Cast vote for {position}", key=f"{position}_cast"):
@@ -475,6 +473,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
