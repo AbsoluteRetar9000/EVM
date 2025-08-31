@@ -207,35 +207,29 @@ def voting_interface():
         st.markdown(f"### Select a candidate for {position}")
 
 # Display each candidate with image
-for idx, cand in enumerate(candidates[position]):
-    col1, col2 = st.columns([1, 4])
-    with col1:
-        if cand in symbols and os.path.exists(symbols[cand]):
-            st.image(symbols[cand], width=80)
-        else:
-            st.write("🖼️")  # placeholder if no image
-    with col2:
-        if st.radio(
-            label="",
-            options=[cand],
-            key=f"vote_{position}_{idx}"
-        ) == cand:
-            selected_candidate = cand
+        for idx, cand in enumerate(candidates[position]):
+            col1, col2 = st.columns([1, 4])
+            with col1:
+                if cand in symbols and os.path.exists(symbols[cand]):
+                    st.image(symbols[cand], width=80)
+                else:
+                    st.write("🖼️")  # placeholder if no image
+            with col2:
+                if st.radio(
+                    label="",
+                    options=[cand],
+                    key=f"vote_{position}_{idx}"
+                ) == cand:
+                    selected_candidate = cand
 
-# Option to skip position
-if st.radio(
-    f"Skip {position}?",
-    options=["No", "Yes"],
-    key=f"skip_{position}"
-) == "Yes":
-    selected_candidate = "Skip this position"
-
-# Cast vote button
-if selected_candidate != "Skip this position":
-    if st.button(f"Cast Vote for {position}_{selected_candidate}", key=f"cast_{position}_{selected_candidate}"):
-        cast_vote(position, selected_candidate, voter_id, vote_weight)
-        st.success(f"Vote cast for {selected_candidate} in {position}!")
-        st.rerun()
+        # Option to skip position
+        skip_option = st.radio(
+            f"Skip {position}?",
+            options=["No", "Yes"],
+            key=f"skip_{position}"
+        )
+        if skip_option == "Yes":
+            selected_candidate = "Skip this position"
 
 
             # Cast vote button
@@ -498,6 +492,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
