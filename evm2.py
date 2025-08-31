@@ -1,13 +1,8 @@
+import streamlit as st
 import json
 import os
 from datetime import datetime
 import pandas as pd
-import streamlit as st
-
-if "votes" not in st.session_state:
-    st.session_state["votes"] = []
-
-
 
 # Constants
 ADMIN_PASSWORD = "SMBAvoting1234"
@@ -16,8 +11,6 @@ DATA_DIR = "data"
 CANDIDATES_FILE = os.path.join(DATA_DIR, "candidates.json")
 VOTES_FILE = os.path.join(DATA_DIR, "votes.json")
 VOTERS_FILE = os.path.join(DATA_DIR, "voters.json")
-CANDIDATE_SYMBOLS_FILE = os.path.join(DATA_DIR, "candidate_symbols.json")
-
 
 # Ensure data directory exists
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -74,13 +67,6 @@ def load_voters():
 def save_voters(voters):
     save_json(VOTERS_FILE, voters)
 
-def load_candidate_symbols():
-    return load_json(CANDIDATE_SYMBOLS_FILE)
-
-def save_candidate_symbols(symbols):
-    save_json(CANDIDATE_SYMBOLS_FILE, symbols)
-
-
 def has_voter_voted_for_position(voter_id, position):
     voters = load_voters()
     return voter_id in voters and position in voters[voter_id]
@@ -91,27 +77,6 @@ def record_voter_vote(voter_id, position):
         voters[voter_id] = []
     voters[voter_id].append(position)
     save_voters(voters)
-
-def view_voters():
-    st.subheader("📋 List of Voters")
-    
-    voters = load_voters()
-    
-    if not voters:
-        st.info("No voters have cast their votes yet.")
-        return
-    
-    # Convert voters dict into a DataFrame for easy display
-    voter_data = []
-    for voter_id, positions in voters.items():
-        voter_data.append({
-            "Voter ID": voter_id,
-            "Positions Voted": ", ".join(positions) if positions else "None"
-        })
-    
-    df = pd.DataFrame(voter_data)
-    st.dataframe(df, use_container_width=True)
-
 
 def cast_vote(position, candidate, voter_id, vote_weight=1):
     votes = load_votes()
@@ -140,86 +105,112 @@ def get_results():
 def voting_interface():
     st.header("🗳️ Electronic Voting Machine")
     st.subheader("SMBA School Elections")
-
-    # Initialize session state
-    if "voting_completed" not in st.session_state:
-        st.session_state["voting_completed"] = False
-    if "votes" not in st.session_state:
-        st.session_state["votes"] = {}
-
+    
+    # Initialize session state for voting completion
+    if 'voting_completed' not in st.session_state:
+        st.session_state.voting_completed = False
+    
+    # Check if voting was just completed
+    if st.session_state.voting_completed:
+        st.success("🎉 Thank you for voting!")
+        st.info("Your votes have been recorded successfully.")
+        st.markdown("---")
+        if st.button("Start New Voting Session", type="primary"):
+            st.session_state.voting_completed = False
+            st.rerun()
+        return
+    
+    # Voter ID input
     voter_id = st.text_input("Enter your Voter ID:", placeholder="e.g., STU001, TCH001, etc.")
-
+    
     if not voter_id:
         st.warning("Please enter your Voter ID to proceed with voting.")
         return
-
+    
+    # Check for special vote type
     vote_weight = 1
     voter_type = "Student"
-
+    
     if st.checkbox("I am a Teacher/Principal (requires password)"):
         special_password = st.text_input("Enter special voting password:", type="password")
         if special_password == SPECIAL_VOTE_PASSWORD:
             voter_type_selection = st.radio("Select your role:", ["Teacher", "Principal"])
-            vote_weight = 5 if voter_type_selection == "Teacher" else 10
-            voter_type = voter_type_selection
+            if voter_type_selection == "Teacher":
+                vote_weight = 5
+                voter_type = "Teacher"
+            elif voter_type_selection == "Principal":
+                vote_weight = 10
+                voter_type = "Principal"
             st.success(f"Special voting rights activated for {voter_type} (Weight: {vote_weight})")
         elif special_password:
             st.error("Invalid special voting password!")
             return
-
+    
     st.info(f"Voting as: {voter_type} (Vote Weight: {vote_weight})")
-
+    
     candidates = load_candidates()
-    symbols = load_candidate_symbols()
-
-    # Temporary dictionary for this session's selections
-    local_votes = st.session_state.get("votes", {})
-
-    # Display each position and candidates
-    for position, candidate_list in candidates.items():
+    
+    # Display voting interface for each position
+    st.subheader("Select Candidates for Each Position")
+    
+    # Count how many positions this voter has already voted for
+    voted_positions = 0
+    total_positions_with_candidates = 0
+    
+    for position in candidates:
+        if candidates[position]:  # Only count positions that have candidates
+            total_positions_with_candidates += 1
+            if has_voter_voted_for_position(voter_id, position):
+                voted_positions += 1
+    
+    # Show voting progress
+    if total_positions_with_candidates > 0:
+        st.progress(voted_positions / total_positions_with_candidates)
+        st.caption(f"Progress: {voted_positions}/{total_positions_with_candidates} positions voted")
+    
+    votes_cast = 0
+    
+    for position in candidates:
+        if not candidates[position]:
+            st.warning(f"No candidates available for {position}")
+            continue
+            
         st.markdown(f"### {position}")
-
+        
+        # Check if voter has already voted for this position
         if has_voter_voted_for_position(voter_id, position):
             st.success(f"✅ You have already voted for {position}")
             continue
-
+        
+        # Create voting interface for this position
         selected_candidate = st.radio(
             f"Choose a candidate for {position}:",
-            candidate_list,
-            key=f"vote_{position}",
-            index=candidate_list.index(local_votes.get(position, candidate_list[0]))
+            candidates[position] + ["Skip this position"],
+            key=f"vote_{position}"
         )
+        
+        if selected_candidate != "Skip this position":
+            if st.button(f"Cast Vote for {position}", key=f"cast_{position}"):
+                cast_vote(position, selected_candidate, voter_id, vote_weight)
+                st.success(f"Vote cast for {selected_candidate} in {position}!")
+                votes_cast += 1
+                st.rerun()
+    
+    if votes_cast > 0:
+        st.balloons()
+    
+    # Complete Voting Button (always show at the bottom)
+    st.markdown("---")
+    st.subheader("Finish Voting")
+    
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.write("Click the button below when you're done voting to return to the main menu.")
+    with col2:
+        if st.button("🏁 Complete Voting", type="primary", key="complete_voting"):
+            st.session_state.voting_completed = True
+            st.rerun()
 
-        for cand in candidate_list:
-            if cand in symbols and os.path.exists(symbols[cand]):
-                st.image(symbols[cand], width=130)
-
-        skip_option = st.radio(
-            f"Skip {position}?",
-            ["No", "Yes"],
-            key=f"skip_{position}"
-        )
-        if skip_option == "Yes":
-            selected_candidate = "Skip this position"
-
-        # Save the choice in session state
-        local_votes[position] = selected_candidate
-
-    st.session_state["votes"] = local_votes
-
-    if st.button("✅ Complete Voting"):
-      for position, candidate in local_votes.items():
-          if candidate != "Skip this position":
-              cast_vote(position, candidate, voter_id, vote_weight)
-
-    st.session_state["voting_completed"] = True
-    st.success("🎉 Thank you! Your votes have been recorded successfully!")
-
-    # Start a new voting session by clearing voter-specific session state
-    st.session_state["votes"] = {}
-    voter_id = ""  # reset the text input (optional)
-    st.info("You can now start a new voting session.")
-   
 def admin_panel():
     st.header("🔧 Admin Panel")
     
@@ -238,9 +229,7 @@ def admin_panel():
     # Admin menu
     admin_option = st.selectbox("Select Admin Function:", [
         "Manage Candidates",
-        "Add Candidate Symbols",
         "View Results",
-        "View Voters",
         "Reset Election Data",
         "Export Results"
     ])
@@ -253,11 +242,6 @@ def admin_panel():
         reset_election_data()
     elif admin_option == "Export Results":
         export_results()
-    elif admin_option == "View Voters":
-        view_voters()
-    elif admin_option == "Add Candidate Symbols":
-        manage_candidate_symbols()
-
 
 def manage_candidates():
     st.subheader("Candidate Management")
@@ -305,40 +289,6 @@ def manage_candidates():
             save_candidates(candidates)
             st.success(f"Renamed '{position}' to '{new_position_name}'")
             st.rerun()
-
-
-def manage_candidate_symbols():
-    st.subheader("🖼️ Candidate Symbols Management")
-    
-    candidates = load_candidates()
-    symbols = load_candidate_symbols()
-    
-    for position in candidates:
-        st.markdown(f"### {position}")
-        
-        for candidate in candidates[position]:
-            col1, col2, col3 = st.columns([3, 2, 2])
-            with col1:
-                st.write(candidate)
-            with col2:
-                if candidate in symbols and symbols[candidate]:
-                    st.image(symbols[candidate], width=80, caption="Current Symbol")
-                else:
-                    st.caption("No symbol added")
-            with col3:
-                uploaded_file = st.file_uploader(f"Upload symbol for {candidate}", 
-                                                 type=["png", "jpg", "jpeg"], 
-                                                 key=f"upload_{position}_{candidate}")
-                if uploaded_file is not None:
-                    os.makedirs("symbols", exist_ok=True)
-                    file_path = os.path.join("symbols", uploaded_file.name)
-                    with open(file_path, "wb") as f:
-                        f.write(uploaded_file.getbuffer())
-                    symbols[candidate] = file_path
-                    save_candidate_symbols(symbols)
-                    st.success(f"Added/Updated symbol for {candidate}")
-                    st.rerun()
-
 
 def view_results():
     st.subheader("Election Results")
@@ -458,61 +408,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-def display_candidate_symbol(candidate_name):
-    symbols = load_candidate_symbols()
-    if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
-        st.image(symbols[candidate_name], width=80, caption=candidate_name)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+View this code and tell me where the app stores the list of voters 
 
 
 
