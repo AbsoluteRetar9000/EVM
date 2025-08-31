@@ -186,47 +186,46 @@ def voting_interface():
     st.info(f"Voting as: {voter_type} (Vote Weight: {vote_weight})")
     
     # ✅ Load candidates and symbols
-        # ✅ Load candidates and symbols
     candidates = load_candidates()
     symbols = load_candidate_symbols()
 
-    for position in candidates:   # <--- you were missing this loop
-        # per-position selection stored in session state
+    for position in candidates:
+        st.write(f"### Select your {position}")
+
+        # one selection stored in session state per position
         sel_key = f"{position}_selected"
         if sel_key not in st.session_state:
             st.session_state[sel_key] = None
 
-        # Display each candidate as one row: [marker-button] name | image
-        for idx, cand in enumerate(candidates[position]):
-            col_sel, col_name, col_img = st.columns([1, 7, 2])
-            with col_sel:
-                # marker shows selected/empty; clicking selects this candidate
-                marker = "◉" if st.session_state[sel_key] == cand else "◯"
-                if st.button(marker, key=f"{position}_btn_{idx}"):
-                    st.session_state[sel_key] = cand
-            with col_name:
+        options = candidates[position] + ["Skip this position"]
+        choice = st.radio(
+            label="",   # no repeated "position_choice" labels
+            options=options,
+            index=options.index(st.session_state[sel_key]) if st.session_state[sel_key] in options else 0,
+            key=sel_key
+        )
+
+        st.session_state[sel_key] = choice
+
+        # render each candidate row manually with its image
+        for cand in candidates[position]:
+            col1, col2 = st.columns([7, 2])
+            with col1:
                 st.markdown(f"**{cand}**")
-            with col_img:
+            with col2:
                 if cand in symbols and os.path.exists(symbols[cand]):
                     st.image(symbols[cand], width=60)
 
-        # Skip option row (same style)
-        col_sel, col_name = st.columns([1, 9])
-        with col_sel:
-            marker = "◉" if st.session_state[sel_key] == "Skip this position" else "◯"
-            if st.button(marker, key=f"{position}_btn_skip"):
-                st.session_state[sel_key] = "Skip this position"
-        with col_name:
-            st.markdown("*Skip this position*")
+        # Skip option display (no image)
+        st.markdown("*Skip this position*")
 
-        # expose selection to the rest of your code exactly as before
-        selected_candidate = st.session_state[sel_key]
-
-        # Save choice temporarily
+        # Cast button for this position
         if st.button(f"Cast vote for {position}", key=f"{position}_cast"):
+            selected_candidate = st.session_state[sel_key]
             if selected_candidate:
                 st.session_state["votes"].append((position, selected_candidate))
                 st.success(f"Vote cast for {position}: {selected_candidate}")
+
 
     
     # ✅ Final button to complete voting
@@ -482,6 +481,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
