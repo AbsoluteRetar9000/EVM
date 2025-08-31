@@ -190,7 +190,7 @@ def voting_interface():
     symbols = load_candidate_symbols()
 
     for position in candidates:
-    st.write(f"### Select your {position}")
+      st.write(f"### Select your {position}")
 
     sel_key = f"{position}_selected"
     if sel_key not in st.session_state:
@@ -478,6 +478,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
