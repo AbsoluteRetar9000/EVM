@@ -229,6 +229,7 @@ def admin_panel():
     # Admin menu
     admin_option = st.selectbox("Select Admin Function:", [
         "Manage Candidates",
+        "Manage Candidate Symbols"
         "View Results",
         "Reset Election Data",
         "Export Results"
@@ -242,6 +243,10 @@ def admin_panel():
         reset_election_data()
     elif admin_option == "Export Results":
         export_results()
+    elif admin_option == "Manage Candidate Symbols":
+        manage_candidate_symbols()
+
+
 
 def manage_candidates():
     st.subheader("Candidate Management")
@@ -289,6 +294,51 @@ def manage_candidates():
             save_candidates(candidates)
             st.success(f"Renamed '{position}' to '{new_position_name}'")
             st.rerun()
+
+
+def manage_candidate_symbols():
+    st.subheader("Add Candidate Symbols")
+
+    candidates = load_candidates()   # ✅ load from JSON
+
+    if not candidates:
+        st.info("No candidates found. Please add candidates first.")
+        return
+
+    # Loop through positions and candidates
+    for position, cand_list in candidates.items():
+        st.markdown(f"### {position}")   # show the position name
+        if not cand_list:
+            st.write("No candidates for this position.")
+            continue
+
+        for cand in cand_list:
+            col1, col2 = st.columns([2, 3])
+
+            with col1:
+                st.write(f"Candidate: **{cand}**")
+
+            with col2:
+                uploaded_file = st.file_uploader(
+                    f"Upload symbol for {cand}",
+                    type=["png", "jpg", "jpeg"],
+                    key=f"symbol_{position}_{cand}"
+                )
+
+                if uploaded_file is not None:
+                    os.makedirs("symbols", exist_ok=True)
+                    save_path = os.path.join("symbols", f"{cand}.png")
+
+                    with open(save_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+
+                    st.success(f"Symbol for {cand} uploaded successfully!")
+
+                    # Update JSON mapping
+                    symbols = load_candidate_symbols()
+                    symbols[cand] = save_path
+                    save_candidate_symbols(symbols)
+
 
 def view_results():
     st.subheader("Election Results")
@@ -407,6 +457,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
