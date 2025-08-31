@@ -216,28 +216,32 @@ def voting_interface():
         symbols = load_candidate_symbols()
         st.write(f"### Select your {position}")
 
-        # Build options: candidate names + Skip
+        # Build options (candidates + skip)
         options = candidates[position] + ["Skip this position"]
 
-        # Radio group for this position
+        # Create one radio group for this position
         selected_candidate = st.radio(
             label="",
             options=options,
             key=f"{position}_choice"
         )
 
-        # Show candidates with their images
+        # Display images next to candidates
         for cand in candidates[position]:
-            col1, col2 = st.columns([6, 1])
-            with col1:
-                st.markdown(f"**{cand}**")
-            with col2:
-                if cand in symbols:
-                    st.image(symbols[cand], width=60)
+            if cand in symbols:
+                if selected_candidate == cand:
+                    st.image(symbols[cand], width=60, caption=cand)
 
-        # Handle skip separately (no image for skip option)
+        # Handle skip separately
         if selected_candidate == "Skip this position":
             selected_candidate = "Skip this position"
+
+        # Cast vote button for this position
+        if st.button(f"Cast vote for {position}", key=f"{position}_cast"):
+            if selected_candidate:
+                st.session_state["votes"].append((position, selected_candidate))
+                st.success(f"Vote cast for {position}: {selected_candidate}")
+
 
 
 def admin_panel():
@@ -483,6 +487,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
