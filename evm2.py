@@ -186,9 +186,11 @@ def voting_interface():
     st.info(f"Voting as: {voter_type} (Vote Weight: {vote_weight})")
     
     # ✅ Load candidates and symbols
+        # ✅ Load candidates and symbols
     candidates = load_candidates()
     symbols = load_candidate_symbols()
 
+    for position in candidates:   # <--- you were missing this loop
         # per-position selection stored in session state
         sel_key = f"{position}_selected"
         if sel_key not in st.session_state:
@@ -219,16 +221,13 @@ def voting_interface():
 
         # expose selection to the rest of your code exactly as before
         selected_candidate = st.session_state[sel_key]
-    
 
-
-
-        
         # Save choice temporarily
         if st.button(f"Cast vote for {position}", key=f"{position}_cast"):
             if selected_candidate:
                 st.session_state["votes"].append((position, selected_candidate))
                 st.success(f"Vote cast for {position}: {selected_candidate}")
+
     
     # ✅ Final button to complete voting
     if st.button("✅ Complete Voting", type="primary"):
@@ -483,6 +482,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
