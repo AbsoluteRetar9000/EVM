@@ -116,7 +116,6 @@ def get_results():
             results[position][candidate] = votes.get(vote_key, 0)
     
     return results
-
 def voting_interface():
     st.header("🗳️ Electronic Voting Machine")
     st.subheader("SMBA School Elections")
@@ -178,27 +177,27 @@ def voting_interface():
 
         candidate_list = candidates[position]
 
-        # Display candidates in rows with image as clickable button
+        # Display candidates in rows
         for i in range(0, len(candidate_list), MAX_COLS):
-            row_candidates = candidate_list[i:i + MAX_COLS]
+            row_candidates = candidate_list[i:i+MAX_COLS]
             cols = st.columns(len(row_candidates))
 
             for j, candidate in enumerate(row_candidates):
                 with cols[j]:
                     symbol_path = candidate_symbols.get(candidate)
+                    # Use a clickable button with Markdown image
+                    if st.button("", key=f"{position}_{candidate}"):
+                        cast_vote(position, candidate, voter_id, vote_weight)
+                        st.success(f"✅ Vote cast for {candidate} in {position}!")
+                        st.rerun()
+
                     if symbol_path and os.path.exists(symbol_path):
-                        # Image acts as the button itself
-                        if st.button("", key=f"vote_{position}_{candidate}"):
-                            cast_vote(position, candidate, voter_id, vote_weight)
-                            st.success(f"Vote cast for {candidate} in {position}!")
-                            st.rerun()
-                        st.image(symbol_path, width=120, caption=candidate)
+                        st.markdown(
+                            f'<p style="text-align:center;"><img src="file://{os.path.abspath(symbol_path)}" width="120"><br>{candidate}</p>',
+                            unsafe_allow_html=True
+                        )
                     else:
-                        st.write("🖼️")
-                        if st.button(candidate, key=f"vote_{position}_{candidate}"):
-                            cast_vote(position, candidate, voter_id, vote_weight)
-                            st.success(f"Vote cast for {candidate} in {position}!")
-                            st.rerun()
+                        st.write(candidate)
 
         # Skip button
         if st.button(f"Skip {position}", key=f"skip_{position}"):
@@ -206,6 +205,7 @@ def voting_interface():
             st.info(f"Skipped voting for {position}")
             st.rerun()
 
+    # Complete Voting
     st.markdown("---")
     st.subheader("Finish Voting")
     col1, col2 = st.columns([2, 1])
@@ -215,9 +215,6 @@ def voting_interface():
         if st.button("🏁 Complete Voting", type="primary", key="complete_voting"):
             st.session_state.voting_completed = True
             st.rerun()
-
-
-
 
 
 def admin_panel():
@@ -466,6 +463,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
