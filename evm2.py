@@ -408,7 +408,7 @@ def main():
 if __name__ == "__main__":
     main()
 
-View this code and tell me where the app stores the list of voters 
+
 
 
 
