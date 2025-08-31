@@ -2,6 +2,8 @@ import json
 import os
 from datetime import datetime
 import pandas as pd
+import streamlit as st
+
 
 # Constants
 ADMIN_PASSWORD = "SMBAvoting1234"
@@ -488,6 +490,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
