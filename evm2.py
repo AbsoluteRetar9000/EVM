@@ -11,6 +11,8 @@ DATA_DIR = "data"
 CANDIDATES_FILE = os.path.join(DATA_DIR, "candidates.json")
 VOTES_FILE = os.path.join(DATA_DIR, "votes.json")
 VOTERS_FILE = os.path.join(DATA_DIR, "voters.json")
+CANDIDATE_SYMBOLS_FILE = os.path.join(DATA_DIR, "candidate_symbols.json")
+
 
 # Ensure data directory exists
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -66,6 +68,13 @@ def load_voters():
 
 def save_voters(voters):
     save_json(VOTERS_FILE, voters)
+
+def load_candidate_symbols():
+    return load_json(CANDIDATE_SYMBOLS_FILE)
+
+def save_candidate_symbols(symbols):
+    save_json(CANDIDATE_SYMBOLS_FILE, symbols)
+
 
 def has_voter_voted_for_position(voter_id, position):
     voters = load_voters()
@@ -209,6 +218,12 @@ def voting_interface():
             candidates[position] + ["Skip this position"],
             key=f"vote_{position}"
         )
+        # Show candidate symbols under the options
+symbols = load_candidate_symbols()
+for cand in candidates[position]:
+    if cand in symbols and os.path.exists(symbols[cand]):
+        st.image(symbols[cand], width=100, caption=cand)
+
         
         if selected_candidate != "Skip this position":
             if st.button(f"Cast Vote for {position}", key=f"cast_{position}"):
@@ -250,6 +265,7 @@ def admin_panel():
     # Admin menu
     admin_option = st.selectbox("Select Admin Function:", [
         "Manage Candidates",
+        "Add Candidate Symbols",
         "View Results",
         "View Voters",
         "Reset Election Data",
@@ -266,6 +282,8 @@ def admin_panel():
         export_results()
     elif admin_option == "View Voters":
         view_voters()
+     elif admin_option == "Add Candidate Symbol":
+        manage_candidate_symbols()
 
 
 def manage_candidates():
@@ -314,6 +332,40 @@ def manage_candidates():
             save_candidates(candidates)
             st.success(f"Renamed '{position}' to '{new_position_name}'")
             st.rerun()
+
+
+def manage_candidate_symbols():
+    st.subheader("🖼️ Candidate Symbols Management")
+    
+    candidates = load_candidates()
+    symbols = load_candidate_symbols()
+    
+    for position in candidates:
+        st.markdown(f"### {position}")
+        
+        for candidate in candidates[position]:
+            col1, col2, col3 = st.columns([3, 2, 2])
+            with col1:
+                st.write(candidate)
+            with col2:
+                if candidate in symbols and symbols[candidate]:
+                    st.image(symbols[candidate], width=80, caption="Current Symbol")
+                else:
+                    st.caption("No symbol added")
+            with col3:
+                uploaded_file = st.file_uploader(f"Upload symbol for {candidate}", 
+                                                 type=["png", "jpg", "jpeg"], 
+                                                 key=f"upload_{position}_{candidate}")
+                if uploaded_file is not None:
+                    os.makedirs("symbols", exist_ok=True)
+                    file_path = os.path.join("symbols", uploaded_file.name)
+                    with open(file_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+                    symbols[candidate] = file_path
+                    save_candidate_symbols(symbols)
+                    st.success(f"Added/Updated symbol for {candidate}")
+                    st.rerun()
+
 
 def view_results():
     st.subheader("Election Results")
@@ -432,6 +484,14 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def display_candidate_symbol(candidate_name):
+    symbols = load_candidate_symbols()
+    if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
+        st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
+
 
 
 
