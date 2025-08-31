@@ -148,6 +148,10 @@ def voting_interface():
     if 'votes' not in st.session_state:
         st.session_state['votes'] = []
     
+    # Initialize counters for progress
+    total_positions_with_candidates = 0
+    voted_positions = 0
+
     # Check if voting was just completed
     if st.session_state.voting_completed:
         st.success("🎉 Thank you for voting!")
@@ -158,6 +162,8 @@ def voting_interface():
             st.session_state.votes = []
             st.rerun()
         return
+    
+
     
     # Voter ID input
     voter_id = st.text_input("Enter your Voter ID:", placeholder="e.g., STU001, TCH001, etc.")
@@ -490,6 +496,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
