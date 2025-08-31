@@ -3,7 +3,6 @@ import json
 import os
 from datetime import datetime
 import pandas as pd
-import base64
 
 # Constants
 ADMIN_PASSWORD = "SMBAvoting1234"
@@ -118,96 +117,103 @@ def get_results():
     
     return results
 
-
 def voting_interface():
     st.header("🗳️ Electronic Voting Machine")
     st.subheader("SMBA School Elections")
 
+    # Initialize session state for voting completion
     if 'voting_completed' not in st.session_state:
         st.session_state.voting_completed = False
 
+    # Check if voting was just completed
     if st.session_state.voting_completed:
         st.success("🎉 Thank you for voting!")
         st.info("Your votes have been recorded successfully.")
         st.markdown("---")
-        if st.button("Start New Voting Session"):
+        if st.button("Start New Voting Session", type="primary"):
             st.session_state.voting_completed = False
-            st.experimental_rerun()
+            st.rerun()
         return
 
-    voter_id = st.text_input("Enter your Voter ID:", placeholder="e.g., STU001")
+    # Voter ID input
+    voter_id = st.text_input("Enter your Voter ID:", placeholder="e.g., STU001, TCH001, etc.")
     if not voter_id:
-        st.warning("Please enter your Voter ID to proceed.")
+        st.warning("Please enter your Voter ID to proceed with voting.")
         return
 
-    # Special voting
+    # Check for special vote type
     vote_weight = 1
     voter_type = "Student"
+
     if st.checkbox("I am a Teacher/Principal (requires password)"):
         special_password = st.text_input("Enter special voting password:", type="password")
         if special_password == SPECIAL_VOTE_PASSWORD:
-            role = st.radio("Select your role:", ["Teacher", "Principal"])
-            vote_weight = 5 if role == "Teacher" else 10
-            voter_type = role
-            st.success(f"Voting as {voter_type} (Weight: {vote_weight})")
+            voter_type_selection = st.radio("Select your role:", ["Teacher", "Principal"])
+            if voter_type_selection == "Teacher":
+                vote_weight = 5
+                voter_type = "Teacher"
+            elif voter_type_selection == "Principal":
+                vote_weight = 10
+                voter_type = "Principal"
+            st.success(f"Special voting rights activated for {voter_type} (Weight: {vote_weight})")
         elif special_password:
-            st.error("Invalid password!")
+            st.error("Invalid special voting password!")
             return
 
     st.info(f"Voting as: {voter_type} (Vote Weight: {vote_weight})")
 
-    candidates_data = load_candidates()
+    candidates = load_candidates()
     candidate_symbols = load_candidate_symbols()
-    MAX_COLS = 4
+    MAX_COLS = 4  # max candidates per row
 
     st.subheader("Select Candidates for Each Position")
 
-    for position in candidates_data:
-        candidate_list = candidates_data[position]
-        if not candidate_list:
+    for position in candidates:
+        if not candidates[position]:
             st.warning(f"No candidates available for {position}")
             continue
 
         st.markdown(f"### {position}")
 
+        # Skip if already voted
         if has_voter_voted_for_position(voter_id, position):
-            st.success(f"✅ Already voted for {position}")
+            st.success(f"✅ You have already voted for {position}")
             continue
+
+        candidate_list = candidates[position]
 
         # Display candidates in rows
         for i in range(0, len(candidate_list), MAX_COLS):
-            row_candidates = candidate_list[i:i+MAX_COLS]
+            row_candidates = candidate_list[i:i + MAX_COLS]
             cols = st.columns(len(row_candidates))
-
             for j, candidate in enumerate(row_candidates):
                 with cols[j]:
-                    # Display symbol
-                    symbol_path = candidate_symbols.get(candidate)
-                    if symbol_path and os.path.exists(symbol_path):
-                        st.image(symbol_path, width=120)
+                    if candidate in candidate_symbols and os.path.exists(candidate_symbols[candidate]):
+                        st.image(candidate_symbols[candidate], width=100)
                     else:
                         st.write("🖼️")  # placeholder
 
-                    # Transparent button below image
-                    if st.button(f"Vote for {candidate}", key=f"{position}_{candidate}"):
+                    if st.button(f"Vote for {candidate}", key=f"vote_{position}_{candidate}"):
                         cast_vote(position, candidate, voter_id, vote_weight)
-                        st.success(f"✅ Vote cast for {candidate} in {position}!")
-                        st.experimental_rerun()
+                        st.success(f"Vote cast for {candidate} in {position}!")
+                        st.rerun()
 
         # Skip button
         if st.button(f"Skip {position}", key=f"skip_{position}"):
             record_voter_vote(voter_id, position)
             st.info(f"Skipped voting for {position}")
-            st.experimental_rerun()
+            st.rerun()
 
-    # Complete Voting
+    # Complete Voting Button
     st.markdown("---")
     st.subheader("Finish Voting")
-    if st.button("🏁 Complete Voting"):
-        st.session_state.voting_completed = True
-        st.experimental_rerun()
-
-
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.write("Click the button below when you're done voting to return to the main menu.")
+    with col2:
+        if st.button("🏁 Complete Voting", type="primary", key="complete_voting"):
+            st.session_state.voting_completed = True
+            st.rerun()
 
 
 def admin_panel():
