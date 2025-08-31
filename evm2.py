@@ -211,12 +211,12 @@ def voting_interface():
         st.session_state["votes"][position] = selected_candidate
 
    if st.button("✅ Complete Voting", type="primary"):
-    # Only process if there are votes
-    votes_to_cast = st.session_state.get("votes", {})
-    if votes_to_cast:
-        for position, candidate in votes_to_cast.items():
-            if candidate != "Skip this position":
-                cast_vote(position, candidate, voter_id, vote_weight)
+     # Only process if there are votes
+     votes_to_cast = st.session_state.get("votes", {})
+     if votes_to_cast:
+         for position, candidate in votes_to_cast.items():
+             if candidate != "Skip this position":
+                 cast_vote(position, candidate, voter_id, vote_weight)
         
         # Mark voting as completed
         st.session_state["voting_completed"] = True
@@ -475,6 +475,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
