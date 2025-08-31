@@ -193,53 +193,54 @@ def voting_interface():
     candidates = load_candidates()
     symbols = load_candidate_symbols()
 
-   for position in candidates:
-    if not candidates[position]:
-        st.warning(f"No candidates available for {position}")
-        continue
+       for position in candidates:
+        if not candidates[position]:
+            st.warning(f"No candidates available for {position}")
+            continue
 
-    st.markdown(f"### {position}")
+        st.markdown(f"### {position}")
 
-    if has_voter_voted_for_position(voter_id, position):
-        st.success(f"✅ You have already voted for {position}")
-        continue
+        if has_voter_voted_for_position(voter_id, position):
+            st.success(f"✅ You have already voted for {position}")
+            continue
 
-    # Prepare candidate labels with unique identifiers
-    candidate_labels = []
-    for idx, cand in enumerate(candidates[position]):
-        candidate_labels.append(f"{cand}||{position}||{idx}")  # unique internal label
-
-    candidate_labels.append("Skip this position")
-
-    # Candidate selection radio
-    selected_label = st.radio(
-        f"Choose a candidate for {position}:",
-        candidate_labels,
-        key=f"vote_{position}"
-    )
-
-    # Extract real candidate name
-    if selected_label != "Skip this position":
-        selected_candidate = selected_label.split("||")[0]
-
-        # Display candidate images in columns
+        # Prepare candidate labels with unique identifiers
+        candidate_labels = []
         for idx, cand in enumerate(candidates[position]):
-            if cand == selected_candidate:
-                col1, col2 = st.columns([1, 4])
-                with col1:
-                    if cand in symbols and os.path.exists(symbols[cand]):
-                        st.image(symbols[cand], width=80)
-                    else:
-                        st.write("🖼️")
-                with col2:
-                    st.write(cand)
-                break
+            candidate_labels.append(f"{cand}||{position}||{idx}")  # unique internal label
 
-        # Cast vote button
-        if st.button(f"Cast Vote for {position}_{selected_candidate}", key=f"cast_{position}_{selected_candidate}"):
-            cast_vote(position, selected_candidate, voter_id, vote_weight)
-            st.success(f"Vote cast for {selected_candidate} in {position}!")
-            st.rerun()
+        candidate_labels.append("Skip this position")
+
+        # Candidate selection radio
+        selected_label = st.radio(
+            f"Choose a candidate for {position}:",
+            candidate_labels,
+            key=f"vote_{position}"
+        )
+
+        # Extract real candidate name
+        if selected_label != "Skip this position":
+            selected_candidate = selected_label.split("||")[0]
+
+            # Display candidate images in columns
+            for idx, cand in enumerate(candidates[position]):
+                if cand == selected_candidate:
+                    col1, col2 = st.columns([1, 4])
+                    with col1:
+                        if cand in symbols and os.path.exists(symbols[cand]):
+                            st.image(symbols[cand], width=80)
+                        else:
+                            st.write("🖼️")
+                    with col2:
+                        st.write(cand)
+                    break
+
+            # Cast vote button
+            if st.button(f"Cast Vote for {position}_{selected_candidate}", key=f"cast_{position}_{selected_candidate}"):
+                cast_vote(position, selected_candidate, voter_id, vote_weight)
+                st.success(f"Vote cast for {selected_candidate} in {position}!")
+                st.rerun()
+
 
     # Final button to complete voting
     if st.button("✅ Complete Voting", type="primary"):
@@ -494,6 +495,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
