@@ -203,7 +203,7 @@ def voting_interface():
         if st.button(marker, key=f"{position}_btn_{idx}"):
             st.session_state[sel_key] = cand
         with col_name:
-        st.markdown(f"**{cand}**")
+           st.markdown(f"**{cand}**")
         with col_img:
         if cand in symbols and os.path.exists(symbols[cand]):
             st.image(symbols[cand], width=60)
@@ -482,6 +482,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
