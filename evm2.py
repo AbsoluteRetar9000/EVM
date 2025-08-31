@@ -171,7 +171,7 @@ def voting_interface():
     symbols = load_candidate_symbols()
 
     # Temporary dictionary to store votes during this session
-    local_votes = st.session_state.get("votes", {})
+    local_votes = {}
 
     for position, candidate_list in candidates.items():
         st.markdown(f"### {position}")
@@ -182,6 +182,7 @@ def voting_interface():
 
         selected_candidate = st.radio(f"Choose a candidate for {position}:", candidate_list, key=f"vote_{position}")
 
+        # Show symbols
         for cand in candidate_list:
             if cand in symbols and os.path.exists(symbols[cand]):
                 st.image(symbols[cand], width=130)
@@ -193,19 +194,19 @@ def voting_interface():
         # Store in local dictionary
         local_votes[position] = selected_candidate
 
-    # Update session state after the loop
+    # Update session state after loop
     st.session_state["votes"] = local_votes
 
     # Cast all votes at once when clicking Complete Voting
-    if st.button("✅ Complete Voting", type="primary"):
+    if st.button("✅ Complete Voting"):
         for position, candidate in local_votes.items():
             if candidate != "Skip this position":
                 cast_vote(position, candidate, voter_id, vote_weight)
         st.session_state["voting_completed"] = True
         st.success("🎉 Thank you! Your votes have been recorded successfully!")
-        st.experimental_rerun()  # Only call once here
-
-
+        
+        # Only call rerun **once**, after all votes are cast
+        st.experimental_rerun()
 
    
 def admin_panel():
@@ -451,6 +452,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
