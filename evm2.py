@@ -206,19 +206,33 @@ def voting_interface():
 
         st.markdown(f"### Select a candidate for {position}")
 
-# Display each candidate with image
-        for idx, cand in enumerate(candidates[position]):
-            col1, col2 = st.columns([2, 3])
-            with col2:
-                if cand in symbols and os.path.exists(symbols[cand]):
-                    st.image(symbols[cand], width=130)
-            with col1:
-                if st.radio(
-                    label="",
-                    options=[cand],
-                    key=f"vote_{position}_{idx}"
-                ) == cand:
-                    selected_candidate = cand
+        # Prepare candidate options with images
+candidate_options = []
+for cand in candidates[position]:
+    candidate_options.append(cand)
+
+selected_candidate = st.radio(
+    f"Choose a candidate for {position}:",
+    options=candidate_options,
+    index=None,  # No default selection
+    key=f"vote_{position}"
+)
+
+# Display selected candidate's image next to their name
+for cand in candidates[position]:
+    col1, col2 = st.columns([2, 3])
+    with col1:
+        if st.radio(
+            label="",
+            options=[cand],
+            index=None,
+            key=f"vote_img_{position}_{cand}"
+        ):
+            pass  # this radio is only for layout, can ignore selection
+    with col2:
+        if cand in symbols and os.path.exists(symbols[cand]):
+            st.image(symbols[cand], width=130)
+
 
         # Option to skip position
         skip_option = st.radio(
@@ -490,6 +504,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
