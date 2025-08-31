@@ -220,28 +220,29 @@ def voting_interface():
             st.success(f"✅ You have already voted for {position}")
             continue
         
-         # Display candidates with images
-candidate_labels = []
-for cand in candidates[position]:
-    col1, col2 = st.columns([1, 4])
-    with col1:
-        if cand in symbols and os.path.exists(symbols[cand]):
-            st.image(symbols[cand], width=80)
-        else:
-            st.write("🖼️")  # Placeholder if no symbol
-    with col2:
-        st.write(cand)
-    candidate_labels.append(cand)
+                 # Display candidates with images
+        candidate_labels = []
+        for cand in candidates[position]:
+            col1, col2 = st.columns([1, 4])
+            with col1:
+                if cand in symbols and os.path.exists(symbols[cand]):
+                    st.image(symbols[cand], width=80)
+                else:
+                    st.write("🖼️")  # Placeholder if no symbol
+            with col2:
+                st.write(cand)
+            candidate_labels.append(cand)
 
-# Add skip option
-candidate_labels.append("Skip this position")
+        # Add skip option
+        candidate_labels.append("Skip this position")
 
-# Candidate selection
-selected_candidate = st.radio(
-    f"Choose a candidate for {position}:",
-    candidate_labels,
-    key=f"vote_{position}"
-)
+        # Candidate selection
+        selected_candidate = st.radio(
+            f"Choose a candidate for {position}:",
+            candidate_labels,
+            key=f"vote_{position}"
+        )
+
 
 
 if selected_candidate != "Skip this position":
@@ -508,6 +509,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
