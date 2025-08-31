@@ -223,7 +223,6 @@ def voting_interface():
             st.success(f"Vote cast for {position}: {selected_candidate}")
 
 
-
     
     # ✅ Final button to complete voting
     if st.button("✅ Complete Voting", type="primary"):
@@ -478,6 +477,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
