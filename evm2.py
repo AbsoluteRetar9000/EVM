@@ -189,38 +189,39 @@ def voting_interface():
     candidates = load_candidates()
     symbols = load_candidate_symbols()
 
-   for position in candidates:
-    st.write(f"### Select your {position}")
+       for position in candidates:
+        st.write(f"### Select your {position}")
 
-    sel_key = f"{position}_selected"
+        sel_key = f"{position}_selected"
 
-    options = candidates[position] + ["Skip this position"]
-    choice = st.radio(
-        label="",
-        options=options,
-        index=options.index(st.session_state[sel_key]) if sel_key in st.session_state and st.session_state[sel_key] in options else 0,
-        key=sel_key
-    )
+        options = candidates[position] + ["Skip this position"]
+        choice = st.radio(
+            label="",
+            options=options,
+            index=options.index(st.session_state[sel_key]) if sel_key in st.session_state and st.session_state[sel_key] in options else 0,
+            key=sel_key
+        )
 
-    selected_candidate = choice
+        selected_candidate = choice
 
-    # render each candidate row manually with its image
-    for cand in candidates[position]:
-        col1, col2 = st.columns([7, 2])
-        with col1:
-            st.markdown(f"**{cand}**")
-        with col2:
-            if cand in symbols and os.path.exists(symbols[cand]):
-                st.image(symbols[cand], width=60)
+        # render each candidate row manually with its image
+        for cand in candidates[position]:
+            col1, col2 = st.columns([7, 2])
+            with col1:
+                st.markdown(f"**{cand}**")
+            with col2:
+                if cand in symbols and os.path.exists(symbols[cand]):
+                    st.image(symbols[cand], width=60)
 
-    # Skip option display (no image)
-    st.markdown("*Skip this position*")
+        # Skip option display (no image)
+        st.markdown("*Skip this position*")
 
-    # Cast button for this position
-    if st.button(f"Cast vote for {position}", key=f"{position}_cast"):
-        if selected_candidate:
-            st.session_state["votes"].append((position, selected_candidate))
-            st.success(f"Vote cast for {position}: {selected_candidate}")
+        # Cast button for this position
+        if st.button(f"Cast vote for {position}", key=f"{position}_cast"):
+            if selected_candidate:
+                st.session_state["votes"].append((position, selected_candidate))
+                st.success(f"Vote cast for {position}: {selected_candidate}")
+
 
 
 
@@ -479,6 +480,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
