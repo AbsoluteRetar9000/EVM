@@ -147,25 +147,19 @@ def voting_interface():
     if "votes" not in st.session_state:
         st.session_state["votes"] = {}
 
-    # Voter ID input
     voter_id = st.text_input("Enter your Voter ID:", placeholder="e.g., STU001, TCH001, etc.")
     if not voter_id:
         st.warning("Please enter your Voter ID to proceed with voting.")
         return
 
-    # Special vote handling
     vote_weight = 1
     voter_type = "Student"
     if st.checkbox("I am a Teacher/Principal (requires password)"):
         special_password = st.text_input("Enter special voting password:", type="password")
         if special_password == SPECIAL_VOTE_PASSWORD:
             voter_type_selection = st.radio("Select your role:", ["Teacher", "Principal"])
-            if voter_type_selection == "Teacher":
-                vote_weight = 5
-                voter_type = "Teacher"
-            else:
-                vote_weight = 10
-                voter_type = "Principal"
+            vote_weight = 5 if voter_type_selection == "Teacher" else 10
+            voter_type = voter_type_selection
             st.success(f"Special voting rights activated for {voter_type} (Weight: {vote_weight})")
         elif special_password:
             st.error("Invalid special voting password!")
@@ -173,54 +167,43 @@ def voting_interface():
 
     st.info(f"Voting as: {voter_type} (Vote Weight: {vote_weight})")
 
-    # Load candidates and symbols
     candidates = load_candidates()
     symbols = load_candidate_symbols()
 
-    # Loop through each position
+    # Temporary dictionary to store votes during this session
+    local_votes = st.session_state.get("votes", {})
+
     for position, candidate_list in candidates.items():
         st.markdown(f"### {position}")
 
-        # Skip if voter already voted
         if has_voter_voted_for_position(voter_id, position):
             st.success(f"✅ You have already voted for {position}")
             continue
 
-        # Display candidates and their symbols
-        selected_candidate = st.radio(
-            f"Choose a candidate for {position}:",
-            options=candidate_list,
-            key=f"vote_{position}"
-        )
+        selected_candidate = st.radio(f"Choose a candidate for {position}:", candidate_list, key=f"vote_{position}")
+
         for cand in candidate_list:
             if cand in symbols and os.path.exists(symbols[cand]):
                 st.image(symbols[cand], width=130)
 
-        # Option to skip
-        skip_option = st.radio(
-            f"Skip {position}?",
-            options=["No", "Yes"],
-            key=f"skip_{position}"
-        )
+        skip_option = st.radio(f"Skip {position}?", ["No", "Yes"], key=f"skip_{position}")
         if skip_option == "Yes":
             selected_candidate = "Skip this position"
 
-        # Cast vote button
-        if st.button(f"Cast Vote for {position}", key=f"cast_{position}"):
-            st.session_state["votes"][position] = selected_candidate
-            if selected_candidate != "Skip this position":
-                cast_vote(position, selected_candidate, voter_id, vote_weight)
-            st.success(f"Vote cast for {selected_candidate} in {position}!")
-            st.experimental_rerun()  # <--- INSIDE button block
+        # Store in local dictionary
+        local_votes[position] = selected_candidate
 
-    # Complete voting button
+    # Update session state after the loop
+    st.session_state["votes"] = local_votes
+
+    # Cast all votes at once when clicking Complete Voting
     if st.button("✅ Complete Voting", type="primary"):
-        for position, candidate in st.session_state.get("votes", {}).items():
+        for position, candidate in local_votes.items():
             if candidate != "Skip this position":
                 cast_vote(position, candidate, voter_id, vote_weight)
         st.session_state["voting_completed"] = True
         st.success("🎉 Thank you! Your votes have been recorded successfully!")
-        st.experimental_rerun()  # <--- INSIDE button block
+        st.experimental_rerun()  # Only call once here
 
 
 
@@ -468,6 +451,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
