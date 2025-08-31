@@ -159,8 +159,8 @@ def voting_interface():
     
     MAX_COLS = 4  # max candidates per row
 
- for position in candidates:
-    if not candidates[position]:
+    for position in candidates:
+     if not candidates[position]:
         st.warning(f"No candidates available for {position}")
         continue
 
@@ -455,6 +455,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
