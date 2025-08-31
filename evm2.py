@@ -190,39 +190,51 @@ def voting_interface():
     symbols = load_candidate_symbols()
 
     for position in candidates:
-      st.write(f"### Select your {position}")
+        if candidates[position]:  # Only count positions that have candidates
+            total_positions_with_candidates += 1
+            if has_voter_voted_for_position(voter_id, position):
+                voted_positions += 1
+    
+    # Show voting progress
+    if total_positions_with_candidates > 0:
+        st.progress(voted_positions / total_positions_with_candidates)
+        st.caption(f"Progress: {voted_positions}/{total_positions_with_candidates} positions voted")
+    
+    votes_cast = 0
+    
+    for position in candidates:
+        if not candidates[position]:
+            st.warning(f"No candidates available for {position}")
+            continue
+            
+        st.markdown(f"### {position}")
+        
+        # Check if voter has already voted for this position
+        if has_voter_voted_for_position(voter_id, position):
+            st.success(f"✅ You have already voted for {position}")
+            continue
+        
+        # Create voting interface for this position
+        selected_candidate = st.radio(
+            f"Choose a candidate for {position}:",
+            candidates[position] + ["Skip this position"],
+            key=f"vote_{position}"
+        )
+        symbols = load_candidate_symbols()
+        if position in candidates:   # ✅ ensures candidates[position] exists
+            for cand in candidates[position]:
+                if cand in symbols and os.path.exists(symbols[cand]):
+                    st.image(symbols[cand], width=100, caption=cand)
 
-    sel_key = f"{position}_selected"
-    if sel_key not in st.session_state:
-        st.session_state[sel_key] = None
-
-    options = candidates[position] + ["Skip this position"]
-    selected_candidate = st.radio(
-        label="",  # no repeated label
-        options=options,
-        index=options.index(st.session_state[sel_key]) if st.session_state[sel_key] in options else 0,
-        key=sel_key
-    )
-
-    st.session_state[sel_key] = selected_candidate
-
-    # Display candidate images
-    for cand in candidates[position]:
-        col1, col2 = st.columns([7, 2])
-        with col1:
-            st.markdown(f"**{cand}**")
-        with col2:
-            if cand in symbols and os.path.exists(symbols[cand]):
-                st.image(symbols[cand], width=60)
-
-    # Display skip option text
-    st.markdown("*Skip this position*")
-
-    # Cast vote button for this position
-    if st.button(f"Cast vote for {position}", key=f"{position}_cast"):
-        if selected_candidate:
-            st.session_state["votes"].append((position, selected_candidate))
-            st.success(f"Vote cast for {position}: {selected_candidate}")
+        if selected_candidate != "Skip this position":
+            if st.button(f"Cast Vote for {position}", key=f"cast_{position}"):
+                cast_vote(position, selected_candidate, voter_id, vote_weight)
+                st.success(f"Vote cast for {selected_candidate} in {position}!")
+                votes_cast += 1
+                st.rerun()
+    
+    if votes_cast > 0:
+        st.balloons()
     
     
     # ✅ Final button to complete voting
@@ -478,6 +490,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
