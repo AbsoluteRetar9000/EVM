@@ -138,25 +138,27 @@ def get_results():
     return results
 
 def voting_interface():
-    if not isinstance(st.session_state.get("votes"), dict):
-                st.session_state["votes"] = {}
-
     st.header("🗳️ Electronic Voting Machine")
     st.subheader("SMBA School Elections")
 
-    # Initialize session state for voting completion and selections
+    # Initialize session state
     if "voting_completed" not in st.session_state:
         st.session_state["voting_completed"] = False
     if "votes" not in st.session_state:
         st.session_state["votes"] = {}
+    if "voter_id" not in st.session_state:
+        st.session_state["voter_id"] = ""
+    if "vote_weight" not in st.session_state:
+        st.session_state["vote_weight"] = 1
 
     # Voter ID input
     voter_id = st.text_input("Enter your Voter ID:", placeholder="e.g., STU001, TCH001, etc.")
     if not voter_id:
         st.warning("Please enter your Voter ID to proceed with voting.")
         return
+    st.session_state["voter_id"] = voter_id
 
-    # Special vote type handling
+    # Special voter (Teacher/Principal) handling
     vote_weight = 1
     voter_type = "Student"
     if st.checkbox("I am a Teacher/Principal (requires password)"):
@@ -173,36 +175,37 @@ def voting_interface():
         elif special_password:
             st.error("Invalid special voting password!")
             return
-
+    st.session_state["vote_weight"] = vote_weight
     st.info(f"Voting as: {voter_type} (Vote Weight: {vote_weight})")
 
     # Load candidates and symbols
     candidates = load_candidates()
     symbols = load_candidate_symbols()
 
-    # Loop through each position
+    # Loop through positions
     for position, candidate_list in candidates.items():
         st.markdown(f"### {position}")
 
-        # Skip if voter already voted
         if has_voter_voted_for_position(voter_id, position):
             st.success(f"✅ You have already voted for {position}")
             continue
 
-        # Show candidates with images
-        col1, col2 = st.columns([2, 3])
-        with col1:
-            selected_candidate = st.radio(
-                f"Choose a candidate for {position}:",
-                options=candidate_list,
-                key=f"vote_{position}"
-            )
-        with col2:
-            for cand in candidate_list:
-                if cand in symbols and os.path.exists(symbols[cand]):
-                    st.image(symbols[cand], width=130)
+        # Display candidates with gaps
+        for idx, candidate in enumerate(candidate_list):
+            st.write(f"**{candidate}**")
+            if candidate in symbols and os.path.exists(symbols[candidate]):
+                st.image(symbols[candidate], width=130)
+            # Add gap after each candidate
+            st.markdown("---")
 
-        # Skip position option
+        # Candidate selection
+        selected_candidate = st.radio(
+            f"Choose a candidate for {position}:",
+            options=candidate_list,
+            key=f"vote_{position}"
+        )
+
+        # Skip option
         skip_option = st.radio(
             f"Skip {position}?",
             options=["No", "Yes"],
@@ -211,18 +214,25 @@ def voting_interface():
         if skip_option == "Yes":
             selected_candidate = "Skip this position"
 
-        # Cast vote button
-        if st.button(f"Cast Vote for {position}", key=f"cast_{position}"):
+        # Record selection in session_state
+        if st.button(f"Select for {position}", key=f"select_{position}"):
             st.session_state["votes"][position] = selected_candidate
-            cast_vote(position, selected_candidate, voter_id, vote_weight)
-            st.success(f"Vote cast for {selected_candidate} in {position}!")
-            st.rerun()
+            st.success(f"Selected {selected_candidate} for {position}!")
 
     # Complete voting button
     if st.button("✅ Complete Voting", type="primary"):
-        st.session_state.voting_completed = True
-        st.success("🎉 Thank you! Your votes have been recorded successfully.")
-        st.rerun()
+        voter_id = st.session_state["voter_id"]
+        vote_weight = st.session_state["vote_weight"]
+
+        if not voter_id:
+            st.error("Voter ID missing! Cannot complete voting.")
+        else:
+            for position, candidate in st.session_state["votes"].items():
+                if candidate != "Skip this position" and not has_voter_voted_for_position(voter_id, position):
+                    cast_vote(position, candidate, voter_id, vote_weight)
+            st.session_state["voting_completed"] = True
+            st.success("🎉 Thank you! Your votes have been recorded successfully.")
+            st.rerun()
 
 
 
@@ -469,6 +479,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
