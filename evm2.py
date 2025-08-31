@@ -210,25 +210,23 @@ def voting_interface():
         # Save selection to session state
         st.session_state["votes"][position] = selected_candidate
 
-    # Complete voting button
-if st.button("✅ Complete Voting", type="primary"):
-    # Cast all votes
-    for position, candidate in st.session_state["votes"].items():
+    if st.button("✅ Complete Voting", type="primary"):
+    # Loop through all votes in session state
+    for position, candidate in st.session_state.get("votes", {}).items():
         if candidate != "Skip this position":
             cast_vote(position, candidate, voter_id, vote_weight)
-    
+
     # Mark voting as completed
     st.session_state["voting_completed"] = True
-    
-    # Clear stored votes after submission
-    st.session_state["votes"] = {}
-    
-    # Show success message
-    st.success("🎉 Thank you! Your votes have been recorded successfully.")
-    
-    # Rerun the app after all processing is done
-    st.experimental_rerun()
 
+    # Clear votes after submission
+    st.session_state["votes"] = {}
+
+    # Show success message
+    st.success("🎉 Thank you! Your votes have been recorded successfully!")
+
+    # Rerun the app safely after processing
+    st.experimental_rerun()  # <-- this MUST be inside the if block
 
 
 def admin_panel():
@@ -474,6 +472,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
