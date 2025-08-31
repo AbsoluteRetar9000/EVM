@@ -364,6 +364,8 @@ def manage_candidate_symbols():
                 save_candidate_symbols(symbols)
 
 
+
+
 def view_results():
     st.subheader("Election Results")
     
@@ -487,6 +489,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
