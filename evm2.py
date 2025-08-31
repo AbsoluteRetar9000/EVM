@@ -223,13 +223,12 @@ def voting_interface():
             col1, col2 = st.columns([6, 1])
             with col1:
                 choice = st.radio(
-                    label="",                  # 👈 hides the default label
+                    label="",                  # 👈 hides default label
                     options=[cand],
                     key=f"{position}_{cand}"
                 )
                 if choice == cand:
                     selected_candidate = cand
-                st.markdown(f"**{cand}**")    # 👈 show candidate name manually
             with col2:
                 if cand in symbols:
                     st.image(symbols[cand], width=60)
@@ -242,8 +241,6 @@ def voting_interface():
         )
         if skip_choice == "Skip this position":
             selected_candidate = "Skip this position"
-
-
 
 
 def admin_panel():
@@ -489,6 +486,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
