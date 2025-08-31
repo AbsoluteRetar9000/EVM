@@ -55,11 +55,19 @@ def load_candidates():
 def save_candidates(candidates):
     save_json(CANDIDATES_FILE, candidates)
 
+SYMBOLS_FILE = os.path.join(DATA_DIR, "candidate_symbols.json")
+
 def load_candidate_symbols():
-    return load_json(CANDIDATE_SYMBOLS_FILE)
+    try:
+        with open(SYMBOLS_FILE, "r") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
 
 def save_candidate_symbols(symbols):
-    save_json(CANDIDATE_SYMBOLS_FILE, symbols)
+    with open(SYMBOLS_FILE, "w") as f:
+        json.dump(symbols, f, indent=2)
+
 
 
 def load_votes():
@@ -454,6 +462,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
