@@ -159,7 +159,7 @@ def voting_interface():
     MAX_COLS = 4  # max candidates per row
 
     for position in candidates:
-    if not candidates[position]:
+        if not candidates[position]:
         st.warning(f"No candidates available for {position}")
         continue
 
@@ -174,6 +174,7 @@ def voting_interface():
     candidate_list = candidates[position]
 
     # Display candidates in rows
+    MAX_COLS = 4  # max candidates per row
     for i in range(0, len(candidate_list), MAX_COLS):
         row_candidates = candidate_list[i:i+MAX_COLS]
         cols = st.columns(len(row_candidates))
@@ -455,6 +456,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
