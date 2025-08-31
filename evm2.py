@@ -217,7 +217,7 @@ def voting_interface():
                cast_vote(position, candidate, voter_id, vote_weight)
 
      # Mark voting as completed
-     st.session_state["voting_completed"] = True
+    st.session_state["voting_completed"] = True
 
      # Clear votes after submission
     st.session_state["votes"] = {}
@@ -472,6 +472,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
