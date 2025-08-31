@@ -194,27 +194,20 @@ def voting_interface():
         st.write(f"### Select your {position}")
         
         # Candidate options + skip
-        options = candidates[position] + ["Skip this position"]
-        
-        # One radio per position
-        selected_candidate = st.radio(
-            label="",
-            options=options,
-            key=f"{position}_choice"
-        )
-        
-        # Show candidates with images + marker
-        for cand in options:
-            col1, col2 = st.columns([6, 1])
-            with col1:
-                marker = "✅" if cand == selected_candidate else "⬜"
-                if cand != "Skip this position":
-                    st.markdown(f"{marker} **{cand}**")
-                else:
-                    st.markdown(f"{marker} *{cand}*")
-            with col2:
-                if cand in symbols:
-                    st.image(symbols[cand], width=60)
+options = candidates[position] + ["Skip this position"]
+
+# Display candidates with images and radio in the same row
+selected_candidate = st.radio(
+    f"Select candidate for {position}:",
+    options,
+    key=f"{position}_choice",
+    label_visibility="collapsed"  # hide default label
+)
+
+# Show the selected candidate’s image inline
+if selected_candidate and selected_candidate in symbols:
+    st.image(symbols[selected_candidate], width=80)
+
         
         # Save choice temporarily
         if st.button(f"Cast vote for {position}", key=f"{position}_cast"):
@@ -475,6 +468,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
