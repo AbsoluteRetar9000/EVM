@@ -191,10 +191,10 @@ def voting_interface():
 
      # per-position selection stored in session state
     sel_key = f"{position}_selected"
-     if sel_key not in st.session_state:
-         st.session_state[sel_key] = None
+    if sel_key not in st.session_state:
+        st.session_state[sel_key] = None
 
-     # Display each candidate as one row: [marker-button] name | image
+ # Display each candidate as one row: [marker-button] name | image
     for idx, cand in enumerate(candidates[position]):
         col_sel, col_name, col_img = st.columns([1, 7, 2])
          with col_sel:
@@ -482,6 +482,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
