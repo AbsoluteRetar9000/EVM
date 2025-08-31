@@ -156,11 +156,10 @@ def voting_interface():
     # Count how many positions this voter has already voted for
     voted_positions = 0
     total_positions_with_candidates = 0
-    
     MAX_COLS = 4  # max candidates per row
 
     for position in candidates:
-     if not candidates[position]:
+    if not candidates[position]:
         st.warning(f"No candidates available for {position}")
         continue
 
@@ -196,6 +195,7 @@ def voting_interface():
         record_voter_vote(voter_id, position)
         st.info(f"Skipped voting for {position}")
         st.rerun()
+
     
     # Complete Voting Button (always show at the bottom)
     st.markdown("---")
@@ -455,6 +455,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
