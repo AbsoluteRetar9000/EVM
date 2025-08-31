@@ -157,8 +157,10 @@ def voting_interface():
     voted_positions = 0
     total_positions_with_candidates = 0
     
-    for position in candidates:
-     if not candidates[position]:
+    MAX_COLS = 4  # max candidates per row
+
+for position in candidates:
+    if not candidates[position]:
         st.warning(f"No candidates available for {position}")
         continue
 
@@ -169,33 +171,31 @@ def voting_interface():
         st.success(f"✅ You have already voted for {position}")
         continue
 
-    # Load symbols
     candidate_symbols = load_candidate_symbols()
+    candidate_list = candidates[position]
 
-    # Create columns for candidates
-    cols = st.columns(len(candidates[position]))
+    # Display candidates in rows
+    for i in range(0, len(candidate_list), MAX_COLS):
+        row_candidates = candidate_list[i:i+MAX_COLS]
+        cols = st.columns(len(row_candidates))
 
-    for i, candidate in enumerate(candidates[position]):
-        with cols[i]:
-            # Show symbol if available, else placeholder
-            if candidate in candidate_symbols and os.path.exists(candidate_symbols[candidate]):
-                st.image(candidate_symbols[candidate], width=100)
-            else:
-                st.write("🖼️")  # placeholder
+        for j, candidate in enumerate(row_candidates):
+            with cols[j]:
+                if candidate in candidate_symbols and os.path.exists(candidate_symbols[candidate]):
+                    st.image(candidate_symbols[candidate], width=100)
+                else:
+                    st.write("🖼️")  # placeholder
 
-            # Button to vote
-            if st.button(f"Vote for {candidate}", key=f"vote_{position}_{candidate}"):
-                cast_vote(position, candidate, voter_id, vote_weight)
-                st.success(f"Vote cast for {candidate} in {position}!")
-                st.rerun()
+                if st.button(f"Vote for {candidate}", key=f"vote_{position}_{candidate}"):
+                    cast_vote(position, candidate, voter_id, vote_weight)
+                    st.success(f"Vote cast for {candidate} in {position}!")
+                    st.rerun()
 
-    # Option to skip this position
+    # Skip button
     if st.button(f"Skip {position}", key=f"skip_{position}"):
         record_voter_vote(voter_id, position)
         st.info(f"Skipped voting for {position}")
         st.rerun()
-
-
     
     # Complete Voting Button (always show at the bottom)
     st.markdown("---")
@@ -455,6 +455,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
