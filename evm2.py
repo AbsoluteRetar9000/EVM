@@ -246,6 +246,12 @@ def voting_interface():
                 st.session_state["votes"].append((position, selected_candidate))
                 st.success(f"Vote cast for {position}: {selected_candidate}")
 
+            # Complete voting button
+            if st.button("Complete Voting"):
+               st.success("Thank you! Your votes have been recorded.")
+               save_votes()
+
+
 
 
 def admin_panel():
@@ -491,6 +497,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
