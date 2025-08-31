@@ -207,8 +207,7 @@ def voting_interface():
         # Prepare candidate labels with unique identifiers
         candidate_labels = []
         for idx, cand in enumerate(candidates[position]):
-            candidate_labels.append(f"{cand}||{position}||{idx}")  # unique internal label
-
+            candidate_labels.append(f"{cand}")  # unique internal label
         candidate_labels.append("Skip this position")
 
         # Candidate selection radio
@@ -229,8 +228,7 @@ def voting_interface():
                     with col1:
                         if cand in symbols and os.path.exists(symbols[cand]):
                             st.image(symbols[cand], width=80)
-                        else:
-                            st.write("🖼️")
+                        
                     with col2:
                         st.write(cand)
                     break
@@ -495,6 +493,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
