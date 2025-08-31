@@ -229,7 +229,7 @@ def admin_panel():
     # Admin menu
     admin_option = st.selectbox("Select Admin Function:", [
         "Manage Candidates",
-        "Manage Candidate Symbols"
+        "Manage Candidate Symbols",
         "View Results",
         "Reset Election Data",
         "Export Results"
@@ -457,6 +457,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
