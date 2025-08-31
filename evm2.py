@@ -157,24 +157,24 @@ def voting_interface():
     voted_positions = 0
     total_positions_with_candidates = 0
     
-     for position in candidates:
-    if not candidates[position]:
+    for position in candidates:
+     if not candidates[position]:
         st.warning(f"No candidates available for {position}")
         continue
-        
+
     st.markdown(f"### {position}")
-    
+
     # Skip if already voted
     if has_voter_voted_for_position(voter_id, position):
         st.success(f"✅ You have already voted for {position}")
         continue
-    
+
     # Load symbols
     candidate_symbols = load_candidate_symbols()
-    
-    # Display candidates as image buttons
+
+    # Create columns for candidates
     cols = st.columns(len(candidates[position]))
-    
+
     for i, candidate in enumerate(candidates[position]):
         with cols[i]:
             # Show symbol if available, else placeholder
@@ -182,18 +182,19 @@ def voting_interface():
                 st.image(candidate_symbols[candidate], width=100)
             else:
                 st.write("🖼️")  # placeholder
-            
+
             # Button to vote
-            if st.button(candidate, key=f"vote_{position}_{candidate}"):
+            if st.button(f"Vote for {candidate}", key=f"vote_{position}_{candidate}"):
                 cast_vote(position, candidate, voter_id, vote_weight)
                 st.success(f"Vote cast for {candidate} in {position}!")
                 st.rerun()
-    
-    # Option to skip
+
+    # Option to skip this position
     if st.button(f"Skip {position}", key=f"skip_{position}"):
         record_voter_vote(voter_id, position)
         st.info(f"Skipped voting for {position}")
         st.rerun()
+
 
     
     # Complete Voting Button (always show at the bottom)
@@ -454,6 +455,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
