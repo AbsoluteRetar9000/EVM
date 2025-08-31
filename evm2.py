@@ -210,28 +210,20 @@ def voting_interface():
         # Save selection to session state
         st.session_state["votes"][position] = selected_candidate
 
-   if st.button("✅ Complete Voting", type="primary"):
-     # Only process if there are votes
-     votes_to_cast = st.session_state.get("votes", {})
-     if votes_to_cast:
-         for position, candidate in votes_to_cast.items():
-             if candidate != "Skip this position":
-                 cast_vote(position, candidate, voter_id, vote_weight)
-        
-        # Mark voting as completed
-        st.session_state["voting_completed"] = True
+if st.button("✅ Complete Voting", type="primary"):
+        votes_to_cast = st.session_state.get("votes", {})
+        if votes_to_cast:
+            for position, candidate in votes_to_cast.items():
+                if candidate != "Skip this position":
+                    cast_vote(position, candidate, voter_id)
+            st.session_state["voting_completed"] = True
+            st.session_state["votes"] = {}
+            st.success("🎉 Thank you! Your votes have been recorded successfully!")
+            st.experimental_rerun()
+        else:
+            st.warning("You haven't selected any candidates yet.")
 
-        # Clear votes after submission
-        st.session_state["votes"] = {}
-
-        # Show success message
-        st.success("🎉 Thank you! Your votes have been recorded successfully!")
-        
-        # Rerun safely after processing
-        st.experimental_rerun()  # ONLY inside this if-block
-    else:
-        st.warning("You haven't selected any candidates yet.")
-
+   
 def admin_panel():
     st.header("🔧 Admin Panel")
     
@@ -475,6 +467,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
