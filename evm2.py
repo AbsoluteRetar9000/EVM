@@ -181,14 +181,18 @@ def voting_interface():
             if cand in symbols and os.path.exists(symbols[cand]):
                 st.image(symbols[cand], width=130)
 
-    # COMPLETE VOTING BUTTON
     if st.button("✅ Complete Voting", type="primary"):
+    # Only cast votes if voter_id exists
+    if voter_id:
         for position, candidate in st.session_state.get("votes", {}).items():
             if candidate != "Skip this position":
-                cast_vote(position, candidate, voter_id)  # voter_id is now correctly in scope
+                cast_vote(position, candidate, voter_id)
         st.session_state["voting_completed"] = True
         st.success("🎉 Thank you! Your votes have been recorded successfully!")
-        st.experimental_rerun()
+        st.experimental_rerun()  # <- safe here
+    else:
+        st.error("Voter ID is missing! Please enter your Voter ID.")
+
 
    
 def admin_panel():
@@ -434,6 +438,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
