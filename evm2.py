@@ -206,7 +206,7 @@ def voting_interface():
 
         st.markdown(f"### Select a candidate for {position}")
 
-        # Prepare candidate options with images
+       # Prepare candidate options with images
 candidate_options = []
 for cand in candidates[position]:
     candidate_options.append(cand)
@@ -232,6 +232,7 @@ for cand in candidates[position]:
     with col2:
         if cand in symbols and os.path.exists(symbols[cand]):
             st.image(symbols[cand], width=130)
+
 
 
         # Option to skip position
@@ -504,6 +505,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
