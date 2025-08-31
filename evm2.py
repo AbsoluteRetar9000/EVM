@@ -167,7 +167,7 @@ def voting_interface():
     # Skip if already voted
     if has_voter_voted_for_position(voter_id, position):
         st.success(f"✅ You have already voted for {position}")
-        continue
+    continue
 
     # Load symbols
     candidate_symbols = load_candidate_symbols()
@@ -455,6 +455,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
