@@ -223,10 +223,10 @@ def voting_interface():
     st.session_state["votes"] = {}
 
      # Show success message
-     st.success("🎉 Thank you! Your votes have been recorded successfully!")
+    st.success("🎉 Thank you! Your votes have been recorded successfully!")
 
      # Rerun the app safely after processing
-     st.experimental_rerun()  # <-- this MUST be inside the if block
+    st.experimental_rerun()  # <-- this MUST be inside the if block
 
 
 def admin_panel():
@@ -472,6 +472,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
