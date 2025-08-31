@@ -162,11 +162,6 @@ def voting_interface():
 
     st.subheader("Select Candidates for Each Position")
 
-    # Helper: convert image to base64
-    def img_to_base64(path):
-        with open(path, "rb") as f:
-            return base64.b64encode(f.read()).decode()
-
     for position in candidates_data:
         candidate_list = candidates_data[position]
         if not candidate_list:
@@ -179,32 +174,25 @@ def voting_interface():
             st.success(f"✅ Already voted for {position}")
             continue
 
-        # Build options as HTML with images
-        options = []
-        option_values = []
-        for candidate in candidate_list:
-            symbol_path = candidate_symbols.get(candidate)
-            if symbol_path and os.path.exists(symbol_path):
-                img_b64 = img_to_base64(symbol_path)
-                html = f'<img src="data:image/png;base64,{img_b64}" width="120"><br>{candidate}'
-            else:
-                html = f'🖼️<br>{candidate}'
-            options.append(html)
-            option_values.append(candidate)
+        # Display candidates in rows
+        for i in range(0, len(candidate_list), MAX_COLS):
+            row_candidates = candidate_list[i:i+MAX_COLS]
+            cols = st.columns(len(row_candidates))
 
-        selected_candidate = st.radio(
-            f"Select your candidate for {position}:",
-            options,
-            format_func=lambda x: option_values[options.index(x)],
-            key=f"radio_{position}",
-            label_visibility="collapsed"
-        )
+            for j, candidate in enumerate(row_candidates):
+                with cols[j]:
+                    # Display symbol
+                    symbol_path = candidate_symbols.get(candidate)
+                    if symbol_path and os.path.exists(symbol_path):
+                        st.image(symbol_path, width=120)
+                    else:
+                        st.write("🖼️")  # placeholder
 
-        if selected_candidate:
-            if st.button(f"Vote for {option_values[options.index(selected_candidate)]}", key=f"vote_{position}"):
-                cast_vote(position, option_values[options.index(selected_candidate)], voter_id, vote_weight)
-                st.success(f"✅ Vote cast for {selected_candidate} in {position}!")
-                st.experimental_rerun()
+                    # Transparent button below image
+                    if st.button(f"Vote for {candidate}", key=f"{position}_{candidate}"):
+                        cast_vote(position, candidate, voter_id, vote_weight)
+                        st.success(f"✅ Vote cast for {candidate} in {position}!")
+                        st.experimental_rerun()
 
         # Skip button
         if st.button(f"Skip {position}", key=f"skip_{position}"):
@@ -218,6 +206,7 @@ def voting_interface():
     if st.button("🏁 Complete Voting"):
         st.session_state.voting_completed = True
         st.experimental_rerun()
+
 
 
 
@@ -467,6 +456,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
