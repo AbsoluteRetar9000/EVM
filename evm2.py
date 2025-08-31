@@ -189,7 +189,7 @@ def voting_interface():
     candidates = load_candidates()
     symbols = load_candidate_symbols()
 
-       for position in candidates:
+    for position in candidates:
         st.write(f"### Select your {position}")
 
         sel_key = f"{position}_selected"
@@ -480,6 +480,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
