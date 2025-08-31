@@ -139,6 +139,7 @@ def voting_interface():
         st.warning("Please enter your Voter ID to proceed with voting.")
         return
 
+    # Special vote check
     vote_weight = 1
     voter_type = "Student"
     if st.checkbox("I am a Teacher/Principal (requires password)"):
@@ -177,7 +178,7 @@ def voting_interface():
 
         candidate_list = candidates[position]
 
-        # Display candidates in rows with clickable images
+        # Display candidates in rows with image as clickable button
         for i in range(0, len(candidate_list), MAX_COLS):
             row_candidates = candidate_list[i:i + MAX_COLS]
             cols = st.columns(len(row_candidates))
@@ -186,19 +187,20 @@ def voting_interface():
                 with cols[j]:
                     symbol_path = candidate_symbols.get(candidate)
                     if symbol_path and os.path.exists(symbol_path):
+                        # Image acts as the button itself
                         if st.button("", key=f"vote_{position}_{candidate}"):
                             cast_vote(position, candidate, voter_id, vote_weight)
                             st.success(f"Vote cast for {candidate} in {position}!")
                             st.rerun()
-                        st.image(symbol_path, width=100)
-                        st.caption(candidate)
+                        st.image(symbol_path, width=120, caption=candidate)
                     else:
                         st.write("🖼️")
-                        if st.button(f"Vote for {candidate}", key=f"vote_{position}_{candidate}"):
+                        if st.button(candidate, key=f"vote_{position}_{candidate}"):
                             cast_vote(position, candidate, voter_id, vote_weight)
                             st.success(f"Vote cast for {candidate} in {position}!")
                             st.rerun()
 
+        # Skip button
         if st.button(f"Skip {position}", key=f"skip_{position}"):
             record_voter_vote(voter_id, position)
             st.info(f"Skipped voting for {position}")
@@ -213,6 +215,7 @@ def voting_interface():
         if st.button("🏁 Complete Voting", type="primary", key="complete_voting"):
             st.session_state.voting_completed = True
             st.rerun()
+
 
 
 
@@ -462,6 +465,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
