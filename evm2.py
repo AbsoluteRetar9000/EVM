@@ -242,6 +242,7 @@ def voting_interface():
 
 
 
+
 def admin_panel():
     st.header("🔧 Admin Panel")
     
@@ -485,6 +486,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
