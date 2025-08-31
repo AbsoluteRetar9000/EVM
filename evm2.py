@@ -194,64 +194,53 @@ def voting_interface():
     symbols = load_candidate_symbols()
 
     for position in candidates:
-        if candidates[position]:  # Only count positions that have candidates
-            total_positions_with_candidates += 1
-            if has_voter_voted_for_position(voter_id, position):
-                voted_positions += 1
-    
-    # Show voting progress
-    if total_positions_with_candidates > 0:
-        st.progress(voted_positions / total_positions_with_candidates)
-        st.caption(f"Progress: {voted_positions}/{total_positions_with_candidates} positions voted")
-    
-    votes_cast = 0
+    if not candidates[position]:
+        st.warning(f"No candidates available for {position}")
+        continue
 
-    for position in candidates:
-        if not candidates[position]:
-            st.warning(f"No candidates available for {position}")
-            continue
-        
-        st.markdown(f"### {position}")
-        
-        # Check if voter has already voted for this position
-        if has_voter_voted_for_position(voter_id, position):
-            st.success(f"✅ You have already voted for {position}")
-            continue
+    st.markdown(f"### {position}")
 
-        # Display candidates with images and unique keys
-        candidate_labels = []
-        for i, cand in enumerate(candidates[position]):
-            col1, col2 = st.columns([1, 4])
-            with col1:
-                if cand in symbols and os.path.exists(symbols[cand]):
-                    st.image(symbols[cand], width=80)
-                else:
-                    st.write("🖼️")  # Placeholder if no symbol
-            with col2:
-                st.write(cand)
-            candidate_labels.append(f"{cand}||{i}")  # Unique label
+    if has_voter_voted_for_position(voter_id, position):
+        st.success(f"✅ You have already voted for {position}")
+        continue
 
-        # Add skip option
-        candidate_labels.append("Skip this position")
+    # Prepare candidate labels with unique identifiers
+    candidate_labels = []
+    for idx, cand in enumerate(candidates[position]):
+        candidate_labels.append(f"{cand}||{position}||{idx}")  # unique internal label
 
-        # Candidate selection
-        selected_candidate_with_index = st.radio(
-            f"Choose a candidate for {position}:",
-            candidate_labels,
-            key=f"vote_{position}"
-        )
+    candidate_labels.append("Skip this position")
 
-        # Extract candidate name
-        if selected_candidate_with_index != "Skip this position":
-            selected_candidate = selected_candidate_with_index.split("||")[0]
-            if st.button(f"Cast Vote for {position}_{selected_candidate}", key=f"cast_{position}_{selected_candidate}"):
-                cast_vote(position, selected_candidate, voter_id, vote_weight)
-                st.success(f"Vote cast for {selected_candidate} in {position}!")
-                votes_cast += 1
-                st.rerun()
-    
-    if votes_cast > 0:
-        st.balloons()
+    # Candidate selection radio
+    selected_label = st.radio(
+        f"Choose a candidate for {position}:",
+        candidate_labels,
+        key=f"vote_{position}"
+    )
+
+    # Extract real candidate name
+    if selected_label != "Skip this position":
+        selected_candidate = selected_label.split("||")[0]
+
+        # Display candidate images in columns
+        for idx, cand in enumerate(candidates[position]):
+            if cand == selected_candidate:
+                col1, col2 = st.columns([1, 4])
+                with col1:
+                    if cand in symbols and os.path.exists(symbols[cand]):
+                        st.image(symbols[cand], width=80)
+                    else:
+                        st.write("🖼️")
+                with col2:
+                    st.write(cand)
+                break
+
+        # Cast vote button
+        if st.button(f"Cast Vote for {position}_{selected_candidate}", key=f"cast_{position}_{selected_candidate}"):
+            cast_vote(position, selected_candidate, voter_id, vote_weight)
+            st.success(f"Vote cast for {selected_candidate} in {position}!")
+            st.rerun()
+
 
     # Final button to complete voting
     if st.button("✅ Complete Voting", type="primary"):
@@ -506,6 +495,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
