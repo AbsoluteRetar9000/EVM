@@ -78,6 +78,27 @@ def record_voter_vote(voter_id, position):
     voters[voter_id].append(position)
     save_voters(voters)
 
+def view_voters():
+    st.subheader("📋 List of Voters")
+    
+    voters = load_voters()
+    
+    if not voters:
+        st.info("No voters have cast their votes yet.")
+        return
+    
+    # Convert voters dict into a DataFrame for easy display
+    voter_data = []
+    for voter_id, positions in voters.items():
+        voter_data.append({
+            "Voter ID": voter_id,
+            "Positions Voted": ", ".join(positions) if positions else "None"
+        })
+    
+    df = pd.DataFrame(voter_data)
+    st.dataframe(df, use_container_width=True)
+
+
 def cast_vote(position, candidate, voter_id, vote_weight=1):
     votes = load_votes()
     vote_key = f"{position}_{candidate}"
@@ -230,6 +251,7 @@ def admin_panel():
     admin_option = st.selectbox("Select Admin Function:", [
         "Manage Candidates",
         "View Results",
+        "View Voters",
         "Reset Election Data",
         "Export Results"
     ])
@@ -242,6 +264,9 @@ def admin_panel():
         reset_election_data()
     elif admin_option == "Export Results":
         export_results()
+    elif admin_option == "View Voters":
+        view_voters()
+
 
 def manage_candidates():
     st.subheader("Candidate Management")
@@ -407,6 +432,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
