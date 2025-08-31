@@ -211,14 +211,23 @@ def voting_interface():
         st.session_state["votes"][position] = selected_candidate
 
     # Complete voting button
-    if st.button("✅ Complete Voting", type="primary"):
-        for position, candidate in st.session_state["votes"].items():
-            if candidate != "Skip this position":
-                cast_vote(position, candidate, voter_id, vote_weight)
-        st.session_state["voting_completed"] = True
-        st.success("🎉 Thank you! Your votes have been recorded successfully.")
-        st.session_state["votes"] = {}  # clear votes after submission
-        st.experimental_rerun()
+if st.button("✅ Complete Voting", type="primary"):
+    # Cast all votes
+    for position, candidate in st.session_state["votes"].items():
+        if candidate != "Skip this position":
+            cast_vote(position, candidate, voter_id, vote_weight)
+    
+    # Mark voting as completed
+    st.session_state["voting_completed"] = True
+    
+    # Clear stored votes after submission
+    st.session_state["votes"] = {}
+    
+    # Show success message
+    st.success("🎉 Thank you! Your votes have been recorded successfully.")
+    
+    # Rerun the app after all processing is done
+    st.experimental_rerun()
 
 
 
@@ -465,6 +474,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
