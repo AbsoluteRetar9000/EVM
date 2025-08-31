@@ -153,12 +153,16 @@ def voting_interface():
 
     st.info(f"Voting as: {voter_type} (Vote Weight: {vote_weight})")
 
-    candidates = load_candidates()
+    candidates_data = load_candidates()
     candidate_symbols = load_candidate_symbols()
+    MAX_COLS = 4
 
-    for position in candidates:
-        if not candidates[position]:
-            st.warning(f"No candidates for {position}")
+    st.subheader("Select Candidates for Each Position")
+
+    for position in candidates_data:
+        candidate_list = candidates_data[position]
+        if not candidate_list:
+            st.warning(f"No candidates available for {position}")
             continue
 
         st.markdown(f"### {position}")
@@ -167,47 +171,38 @@ def voting_interface():
             st.success(f"✅ Already voted for {position}")
             continue
 
-        # Build radio options with images
-        options = []
-        for cand in candidates[position]:
-            symbol_path = candidate_symbols.get(cand)
-            if symbol_path and os.path.exists(symbol_path):
-                img_html = f'<img src="file://{os.path.abspath(symbol_path)}" width="120"><br>{cand}'
-                options.append(img_html)
-            else:
-                options.append(cand)
+        # Display candidates in rows
+        for i in range(0, len(candidate_list), MAX_COLS):
+            row_candidates = candidate_list[i:i+MAX_COLS]
+            cols = st.columns(len(row_candidates))
 
-        # Render radio buttons with images
-        selected = st.radio(
-            "Select your candidate:",
-            options,
-            format_func=lambda x: x,
-            key=f"radio_{position}",
-            label_visibility="collapsed"
-        )
+            for j, candidate in enumerate(row_candidates):
+                with cols[j]:
+                    # Show symbol if exists
+                    symbol_path = candidate_symbols.get(candidate)
+                    if symbol_path and os.path.exists(symbol_path):
+                        st.image(symbol_path, width=120)
+                    else:
+                        st.write("🖼️")  # placeholder
 
-        # Convert selected HTML back to candidate name
-        if selected:
-            # Extract candidate name from HTML if needed
-            candidate_name = selected.split("<br>")[-1] if "<br>" in selected else selected
-            if st.button(f"Cast Vote for {position}", key=f"vote_{position}"):
-                cast_vote(position, candidate_name, voter_id, vote_weight)
-                st.success(f"✅ Vote cast for {candidate_name} in {position}!")
-                st.rerun()
+                    # Button directly below image
+                    if st.button(candidate, key=f"{position}_{candidate}"):
+                        cast_vote(position, candidate, voter_id, vote_weight)
+                        st.success(f"✅ Vote cast for {candidate} in {position}!")
+                        st.experimental_rerun()
 
         # Skip button
         if st.button(f"Skip {position}", key=f"skip_{position}"):
             record_voter_vote(voter_id, position)
-            st.info(f"Skipped {position}")
-            st.rerun()
+            st.info(f"Skipped voting for {position}")
+            st.experimental_rerun()
 
     # Complete Voting
     st.markdown("---")
     st.subheader("Finish Voting")
     if st.button("🏁 Complete Voting"):
         st.session_state.voting_completed = True
-        st.rerun()
-
+        st.experimental_rerun()
 
 
 def admin_panel():
@@ -456,6 +451,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
