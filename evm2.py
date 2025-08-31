@@ -140,36 +140,20 @@ def get_results():
 def voting_interface():
     st.header("🗳️ Electronic Voting Machine")
     st.subheader("SMBA School Elections")
-    
+
     # Initialize session state for voting completion
     if 'voting_completed' not in st.session_state:
         st.session_state.voting_completed = False
-    
     if 'votes' not in st.session_state:
         st.session_state['votes'] = []
-    
-    # Initialize counters for progress
-    total_positions_with_candidates = 0
-    voted_positions = 0
 
-    # Check if voting was just completed
-    if st.session_state.voting_completed:
-        st.success("🎉 Thank you for voting!")
-        st.info("Your votes have been recorded successfully.")
-        st.markdown("---")
-        if st.button("Start New Voting Session", type="primary"):
-            st.session_state.voting_completed = False
-            st.session_state.votes = []
-            st.rerun()
-        return
-
-    # Voter ID input
+    # --- VOTER ID INPUT MUST COME FIRST ---
     voter_id = st.text_input("Enter your Voter ID:", placeholder="e.g., STU001, TCH001, etc.")
     if not voter_id:
         st.warning("Please enter your Voter ID to proceed with voting.")
-        return
-    
-    # Special vote type handling
+        return  # stop further execution until voter_id is entered
+
+    # Special vote type handling (Teacher/Principal)
     vote_weight = 1
     voter_type = "Student"
     if st.checkbox("I am a Teacher/Principal (requires password)"):
@@ -186,12 +170,12 @@ def voting_interface():
         elif special_password:
             st.error("Invalid special voting password!")
             return
-    
+
     st.info(f"Voting as: {voter_type} (Vote Weight: {vote_weight})")
-    
-    # Load candidates and symbols
-candidates = load_candidates()
-symbols = load_candidate_symbols()
+
+    # --- NOW SAFE TO LOOP THROUGH CANDIDATES ---
+    candidates = load_candidates()
+    symbols = load_candidate_symbols()
 
 for position in candidates:
     if not candidates[position]:
@@ -492,6 +476,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
