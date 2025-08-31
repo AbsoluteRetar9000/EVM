@@ -1,4 +1,3 @@
-import streamlit as st
 import json
 import os
 from datetime import datetime
@@ -57,17 +56,6 @@ def load_candidates():
 def save_candidates(candidates):
     save_json(CANDIDATES_FILE, candidates)
 
-def load_candidate_symbols():
-    if os.path.exists("candidate_symbols.json"):
-        with open("candidate_symbols.json", "r") as f:
-            return json.load(f)
-    return {}
-
-def save_candidate_symbols(symbols):
-    with open("candidate_symbols.json", "w") as f:
-        json.dump(symbols, f, indent=4)
-
-
 def load_votes():
     return load_json(VOTES_FILE)
 
@@ -79,6 +67,12 @@ def load_voters():
 
 def save_voters(voters):
     save_json(VOTERS_FILE, voters)
+
+def load_candidate_symbols():
+    return load_json(CANDIDATE_SYMBOLS_FILE)
+
+def save_candidate_symbols(symbols):
+    save_json(CANDIDATE_SYMBOLS_FILE, symbols)
 
 
 def has_voter_voted_for_position(voter_id, position):
@@ -338,6 +332,39 @@ def manage_candidates():
             st.rerun()
 
 
+def manage_candidate_symbols():
+    st.subheader("🖼️ Candidate Symbols Management")
+    
+    candidates = load_candidates()
+    symbols = load_candidate_symbols()
+    
+    for position in candidates:
+        st.markdown(f"### {position}")
+        
+        for candidate in candidates[position]:
+            col1, col2, col3 = st.columns([3, 2, 2])
+            with col1:
+                st.write(candidate)
+            with col2:
+                if candidate in symbols and symbols[candidate]:
+                    st.image(symbols[candidate], width=80, caption="Current Symbol")
+                else:
+                    st.caption("No symbol added")
+            with col3:
+                uploaded_file = st.file_uploader(f"Upload symbol for {candidate}", 
+                                                 type=["png", "jpg", "jpeg"], 
+                                                 key=f"upload_{position}_{candidate}")
+                if uploaded_file is not None:
+                    os.makedirs("symbols", exist_ok=True)
+                    file_path = os.path.join("symbols", uploaded_file.name)
+                    with open(file_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+                    symbols[candidate] = file_path
+                    save_candidate_symbols(symbols)
+                    st.success(f"Added/Updated symbol for {candidate}")
+                    st.rerun()
+
+
 def view_results():
     st.subheader("Election Results")
     
@@ -461,6 +488,8 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
+
 
 
 
