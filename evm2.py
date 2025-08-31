@@ -214,33 +214,30 @@ def voting_interface():
             continue
 
         symbols = load_candidate_symbols()
+        options = candidates[position] + ["Skip this position"]
 
-        st.write("Select your candidate:")
+        # Single radio for the position
+        choice = st.radio(
+            f"Select your {position}:",
+            options=options,
+            key=f"vote_{position}"
+        )
 
-        selected_candidate = None
+        # Display all candidates with their images
         for cand in candidates[position]:
-            col1, col2 = st.columns([4, 1])  # col1 = name, col2 = image
+            col1, col2 = st.columns([4, 1])
             with col1:
-                if st.radio(
-                    f"{position}_choice",
-                    options=[cand],
-                    key=f"{position}_{cand}"
-                ):
-                    selected_candidate = cand
+                st.markdown(
+                    f"**{cand}**" + (" ✅" if cand == choice else "")
+                )
             with col2:
                 if cand in symbols:
                     st.image(symbols[cand], width=60)
 
-        # Add skip option
-        if st.radio(f"{position}_choice", options=["Skip this position"], key=f"{position}_skip"):
-            selected_candidate = "Skip this position"
+        # Show skip option clearly
+        if choice == "Skip this position":
+            st.info("You chose to skip this position.")
 
-        if selected_candidate and selected_candidate != "Skip this position":
-            if st.button(f"Cast Vote for {position}", key=f"cast_{position}"):
-                cast_vote(position, selected_candidate, voter_id, vote_weight)
-                st.success(f"Vote cast for {selected_candidate} in {position}!")
-                votes_cast += 1
-                st.rerun()
 
 
 def admin_panel():
@@ -486,6 +483,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
