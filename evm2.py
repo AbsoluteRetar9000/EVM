@@ -197,7 +197,7 @@ def voting_interface():
  # Display each candidate as one row: [marker-button] name | image
     for idx, cand in enumerate(candidates[position]):
         col_sel, col_name, col_img = st.columns([1, 7, 2])
-         with col_sel:
+        with col_sel:
              # marker shows selected/empty; clicking selects this candidate
             marker = "◉" if st.session_state[sel_key] == cand else "◯"
              if st.button(marker, key=f"{position}_btn_{idx}"):
@@ -482,6 +482,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
