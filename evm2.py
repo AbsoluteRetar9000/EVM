@@ -282,7 +282,7 @@ def admin_panel():
         export_results()
     elif admin_option == "View Voters":
         view_voters()
-    elif admin_option == "Add Candidate Symbol":
+    elif admin_option == "Add Candidate Symbols":
         manage_candidate_symbols()
 
 
@@ -490,6 +490,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
