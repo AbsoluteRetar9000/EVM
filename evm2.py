@@ -177,49 +177,49 @@ def voting_interface():
     candidates = load_candidates()
     symbols = load_candidate_symbols()
 
-for position in candidates:
-    if not candidates[position]:
-        st.warning(f"No candidates available for {position}")
-        continue
+    for position in candidates:
+        if not candidates[position]:
+            st.warning(f"No candidates available for {position}")
+            continue
 
-    st.markdown(f"### {position}")
+        st.markdown(f"### {position}")
 
-    if has_voter_voted_for_position(voter_id, position):
-        st.success(f"✅ You have already voted for {position}")
-        continue
+        if has_voter_voted_for_position(voter_id, position):
+            st.success(f"✅ You have already voted for {position}")
+            continue
 
-    # Prepare candidate options
-    candidate_options = candidates[position]  # use directly
-    selected_candidate = st.radio(
-        f"Choose a candidate for {position}:",
-        options=candidate_options,
-        index=None,  # No default selection
-        key=f"vote_{position}"
-    )
+        # Candidate selection
+        selected_candidate = st.radio(
+            f"Choose a candidate for {position}:",
+            options=candidates[position],
+            key=f"vote_{position}"
+        )
 
-    # Display each candidate's image next to their name
-    for cand in candidates[position]:
-        col1, col2 = st.columns([2, 3])
-        with col1:
-            st.write(cand)
-        with col2:
-            if cand in symbols and os.path.exists(symbols[cand]):
-                st.image(symbols[cand], width=130)
+        # Display images
+        for cand in candidates[position]:
+            col1, col2 = st.columns([2, 3])
+            with col1:
+                st.write(cand)
+            with col2:
+                if cand in symbols and os.path.exists(symbols[cand]):
+                    st.image(symbols[cand], width=130)
 
-    # Option to skip position
-    skip_option = st.radio(
-        f"Skip {position}?",
-        options=["No", "Yes"],
-        key=f"skip_{position}"
-    )
-    if skip_option == "Yes":
-        selected_candidate = "Skip this position"
+        # Skip option
+        skip_option = st.radio(
+            f"Skip {position}?",
+            ["No", "Yes"],
+            key=f"skip_{position}"
+        )
+        if skip_option == "Yes":
+            selected_candidate = "Skip this position"
 
-    # Cast vote button
-    if st.button(f"Cast Vote for {position}_{selected_candidate}", key=f"cast_{position}_{selected_candidate}"):
-        cast_vote(position, selected_candidate, voter_id, vote_weight)
-        st.success(f"Vote cast for {selected_candidate} in {position}!")
-        st.rerun()
+        # Cast vote button
+        if st.button(f"Cast Vote for {position}_{selected_candidate}", key=f"cast_{position}_{selected_candidate}"):
+            cast_vote(position, selected_candidate, voter_id, vote_weight)
+            st.success(f"Vote cast for {selected_candidate} in {position}!")
+            st.rerun()
+
+
 
 
 
@@ -476,6 +476,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
