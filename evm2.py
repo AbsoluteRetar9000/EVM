@@ -211,9 +211,7 @@ def voting_interface():
             col1, col2 = st.columns([1, 4])
             with col1:
                 if cand in symbols and os.path.exists(symbols[cand]):
-                    st.image(symbols[cand], width=80)
-                else:
-                    st.write("🖼️")  # placeholder if no image
+                    st.image(symbols[cand], width=10)
             with col2:
                 if st.radio(
                     label="",
@@ -492,6 +490,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
