@@ -185,36 +185,38 @@ def voting_interface():
     
     st.info(f"Voting as: {voter_type} (Vote Weight: {vote_weight})")
     
+    # ✅ Load candidates and symbols
     candidates = load_candidates()
     symbols = load_candidate_symbols()
-st.write(f"### Select your {position}")
 
-# Candidate options + skip
-options = candidates[position] + ["Skip this position"]
-
-# One radio for the entire position
-selected_candidate = st.radio(
-    label="",                  # hide label
-    options=options,
-    key=f"{position}_choice"
-)
-
-# Now display each candidate row with image
-for cand in options:
-    col1, col2 = st.columns([6, 1])
-    with col1:
-        # Show candidate with radio-like marker
-        marker = "✅" if cand == selected_candidate else "⬜"
-        if cand != "Skip this position":
-            st.markdown(f"{marker} **{cand}**")
-        else:
-            st.markdown(f"{marker} *{cand}*")
-    with col2:
-        if cand in symbols:
-            st.image(symbols[cand], width=60)
-
+    # ✅ Loop through each position
+    for position in candidates:
+        st.write(f"### Select your {position}")
         
-        # save choice temporarily
+        # Candidate options + skip
+        options = candidates[position] + ["Skip this position"]
+        
+        # One radio per position
+        selected_candidate = st.radio(
+            label="",
+            options=options,
+            key=f"{position}_choice"
+        )
+        
+        # Show candidates with images + marker
+        for cand in options:
+            col1, col2 = st.columns([6, 1])
+            with col1:
+                marker = "✅" if cand == selected_candidate else "⬜"
+                if cand != "Skip this position":
+                    st.markdown(f"{marker} **{cand}**")
+                else:
+                    st.markdown(f"{marker} *{cand}*")
+            with col2:
+                if cand in symbols:
+                    st.image(symbols[cand], width=60)
+        
+        # Save choice temporarily
         if st.button(f"Cast vote for {position}", key=f"{position}_cast"):
             if selected_candidate:
                 st.session_state["votes"].append((position, selected_candidate))
@@ -473,6 +475,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
