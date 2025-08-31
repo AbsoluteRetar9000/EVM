@@ -162,9 +162,7 @@ def voting_interface():
             st.session_state.votes = []
             st.rerun()
         return
-    
 
-    
     # Voter ID input
     voter_id = st.text_input("Enter your Voter ID:", placeholder="e.g., STU001, TCH001, etc.")
     if not voter_id:
@@ -191,7 +189,7 @@ def voting_interface():
     
     st.info(f"Voting as: {voter_type} (Vote Weight: {vote_weight})")
     
-    # ✅ Load candidates and symbols
+    # Load candidates and symbols
     candidates = load_candidates()
     symbols = load_candidate_symbols()
 
@@ -207,22 +205,22 @@ def voting_interface():
         st.caption(f"Progress: {voted_positions}/{total_positions_with_candidates} positions voted")
     
     votes_cast = 0
-    
+
     for position in candidates:
         if not candidates[position]:
             st.warning(f"No candidates available for {position}")
             continue
-            
+        
         st.markdown(f"### {position}")
         
         # Check if voter has already voted for this position
         if has_voter_voted_for_position(voter_id, position):
             st.success(f"✅ You have already voted for {position}")
             continue
-        
-                 # Display candidates with images
+
+        # Display candidates with images and unique keys
         candidate_labels = []
-        for cand in candidates[position]:
+        for i, cand in enumerate(candidates[position]):
             col1, col2 = st.columns([1, 4])
             with col1:
                 if cand in symbols and os.path.exists(symbols[cand]):
@@ -231,31 +229,31 @@ def voting_interface():
                     st.write("🖼️")  # Placeholder if no symbol
             with col2:
                 st.write(cand)
-            candidate_labels.append(cand)
+            candidate_labels.append(f"{cand}||{i}")  # Unique label
 
         # Add skip option
         candidate_labels.append("Skip this position")
 
         # Candidate selection
-        selected_candidate = st.radio(
+        selected_candidate_with_index = st.radio(
             f"Choose a candidate for {position}:",
             candidate_labels,
             key=f"vote_{position}"
         )
 
-
-
- # Cast vote button
-        if selected_candidate != "Skip this position":
-            if st.button(f"Cast Vote for {position}", key=f"cast_{position}"):
+        # Extract candidate name
+        if selected_candidate_with_index != "Skip this position":
+            selected_candidate = selected_candidate_with_index.split("||")[0]
+            if st.button(f"Cast Vote for {position}_{selected_candidate}", key=f"cast_{position}_{selected_candidate}"):
                 cast_vote(position, selected_candidate, voter_id, vote_weight)
                 st.success(f"Vote cast for {selected_candidate} in {position}!")
                 votes_cast += 1
                 st.rerun()
+    
+    if votes_cast > 0:
+        st.balloons()
 
-    
-    
-    # ✅ Final button to complete voting
+    # Final button to complete voting
     if st.button("✅ Complete Voting", type="primary"):
         for position, candidate in st.session_state["votes"]:
             if candidate != "Skip this position":
@@ -508,6 +506,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
