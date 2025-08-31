@@ -55,6 +55,13 @@ def load_candidates():
 def save_candidates(candidates):
     save_json(CANDIDATES_FILE, candidates)
 
+def load_candidate_symbols():
+    return load_json(CANDIDATE_SYMBOLS_FILE)
+
+def save_candidate_symbols(symbols):
+    save_json(CANDIDATE_SYMBOLS_FILE, symbols)
+
+
 def load_votes():
     return load_json(VOTES_FILE)
 
@@ -447,6 +454,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
