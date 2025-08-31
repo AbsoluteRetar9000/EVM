@@ -207,15 +207,18 @@ def voting_interface():
 
     st.session_state["votes"] = local_votes
 
-    # Button to complete voting
     if st.button("✅ Complete Voting"):
-        for position, candidate in local_votes.items():
-            if candidate != "Skip this position":
-                cast_vote(position, candidate, voter_id, vote_weight)
-        st.session_state["voting_completed"] = True
-        st.success("🎉 Thank you! Your votes have been recorded successfully!")
-        # No rerun needed — Streamlit will update automatically
+      for position, candidate in local_votes.items():
+          if candidate != "Skip this position":
+              cast_vote(position, candidate, voter_id, vote_weight)
 
+    st.session_state["voting_completed"] = True
+    st.success("🎉 Thank you! Your votes have been recorded successfully!")
+
+    # Start a new voting session by clearing voter-specific session state
+    st.session_state["votes"] = {}
+    voter_id = ""  # reset the text input (optional)
+    st.info("You can now start a new voting session.")
    
 def admin_panel():
     st.header("🔧 Admin Panel")
@@ -460,6 +463,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
