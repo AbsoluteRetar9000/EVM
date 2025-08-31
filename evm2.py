@@ -105,11 +105,11 @@ def get_results():
 def voting_interface():
     st.header("🗳️ Electronic Voting Machine")
     st.subheader("SMBA School Elections")
-    
+
     # Initialize session state for voting completion
     if 'voting_completed' not in st.session_state:
         st.session_state.voting_completed = False
-    
+
     # Check if voting was just completed
     if st.session_state.voting_completed:
         st.success("🎉 Thank you for voting!")
@@ -119,18 +119,17 @@ def voting_interface():
             st.session_state.voting_completed = False
             st.rerun()
         return
-    
+
     # Voter ID input
     voter_id = st.text_input("Enter your Voter ID:", placeholder="e.g., STU001, TCH001, etc.")
-    
     if not voter_id:
         st.warning("Please enter your Voter ID to proceed with voting.")
         return
-    
+
     # Check for special vote type
     vote_weight = 1
     voter_type = "Student"
-    
+
     if st.checkbox("I am a Teacher/Principal (requires password)"):
         special_password = st.text_input("Enter special voting password:", type="password")
         if special_password == SPECIAL_VOTE_PASSWORD:
@@ -145,78 +144,54 @@ def voting_interface():
         elif special_password:
             st.error("Invalid special voting password!")
             return
-    
+
     st.info(f"Voting as: {voter_type} (Vote Weight: {vote_weight})")
-    
+
     candidates = load_candidates()
-    
-    # Display voting interface for each position
-    st.subheader("Select Candidates for Each Position")
-    
-    # Count how many positions this voter has already voted for
-    voted_positions = 0
-    total_positions_with_candidates = 0
+    candidate_symbols = load_candidate_symbols()
     MAX_COLS = 4  # max candidates per row
+
+    st.subheader("Select Candidates for Each Position")
 
     for position in candidates:
         if not candidates[position]:
-        st.warning(f"No candidates available for {position}")
-        continue
+            st.warning(f"No candidates available for {position}")
+            continue
 
-    st.markdown(f"### {position}")
+        st.markdown(f"### {position}")
 
-    # Skip if already voted
-    if has_voter_voted_for_position(voter_id, position):
-        st.success(f"✅ You have already voted for {position}")
-        continue
+        # Skip if already voted
+        if has_voter_voted_for_position(voter_id, position):
+            st.success(f"✅ You have already voted for {position}")
+            continue
 
-    candidate_symbols = load_candidate_symbols()
-    candidate_list = candidates[position]
+        candidate_list = candidates[position]
 
-   for position in candidates:
-    if not candidates[position]:
-        st.warning(f"No candidates available for {position}")
-        continue
+        # Display candidates in rows
+        for i in range(0, len(candidate_list), MAX_COLS):
+            row_candidates = candidate_list[i:i + MAX_COLS]
+            cols = st.columns(len(row_candidates))
+            for j, candidate in enumerate(row_candidates):
+                with cols[j]:
+                    if candidate in candidate_symbols and os.path.exists(candidate_symbols[candidate]):
+                        st.image(candidate_symbols[candidate], width=100)
+                    else:
+                        st.write("🖼️")  # placeholder
 
-    st.markdown(f"### {position}")
+                    if st.button(f"Vote for {candidate}", key=f"vote_{position}_{candidate}"):
+                        cast_vote(position, candidate, voter_id, vote_weight)
+                        st.success(f"Vote cast for {candidate} in {position}!")
+                        st.rerun()
 
-    # Skip if already voted
-    if has_voter_voted_for_position(voter_id, position):
-        st.success(f"✅ You have already voted for {position}")
-        continue
+        # Skip button
+        if st.button(f"Skip {position}", key=f"skip_{position}"):
+            record_voter_vote(voter_id, position)
+            st.info(f"Skipped voting for {position}")
+            st.rerun()
 
-    candidate_symbols = load_candidate_symbols()
-    candidate_list = candidates[position]
-
-    # Display candidates in rows
-    MAX_COLS = 4  # max candidates per row
-    for i in range(0, len(candidate_list), MAX_COLS):
-        row_candidates = candidate_list[i:i + MAX_COLS]
-        cols = st.columns(len(row_candidates))
-
-        for j, candidate in enumerate(row_candidates):
-            with cols[j]:
-                if candidate in candidate_symbols and os.path.exists(candidate_symbols[candidate]):
-                    st.image(candidate_symbols[candidate], width=100)
-                else:
-                    st.write("🖼️")  # placeholder
-
-                if st.button(f"Vote for {candidate}", key=f"vote_{position}_{candidate}"):
-                    cast_vote(position, candidate, voter_id, vote_weight)
-                    st.success(f"Vote cast for {candidate} in {position}!")
-                    st.rerun()
-
-    # Skip button
-    if st.button(f"Skip {position}", key=f"skip_{position}"):
-        record_voter_vote(voter_id, position)
-        st.info(f"Skipped voting for {position}")
-        st.rerun()
-
-    
-    # Complete Voting Button (always show at the bottom)
+    # Complete Voting Button
     st.markdown("---")
     st.subheader("Finish Voting")
-    
     col1, col2 = st.columns([2, 1])
     with col1:
         st.write("Click the button below when you're done voting to return to the main menu.")
@@ -224,6 +199,7 @@ def voting_interface():
         if st.button("🏁 Complete Voting", type="primary", key="complete_voting"):
             st.session_state.voting_completed = True
             st.rerun()
+
 
 def admin_panel():
     st.header("🔧 Admin Panel")
@@ -471,6 +447,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
