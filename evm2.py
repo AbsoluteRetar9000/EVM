@@ -139,7 +139,7 @@ def get_results():
 
 def voting_interface():
     if not isinstance(st.session_state.get("votes"), dict):
-    st.session_state["votes"] = {}
+                st.session_state["votes"] = {}
 
     st.header("🗳️ Electronic Voting Machine")
     st.subheader("SMBA School Elections")
@@ -469,6 +469,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
