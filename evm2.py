@@ -148,12 +148,14 @@ def voting_interface():
         st.session_state["votes"] = {}
 
     voter_id = st.text_input("Enter your Voter ID:", placeholder="e.g., STU001, TCH001, etc.")
+
     if not voter_id:
         st.warning("Please enter your Voter ID to proceed with voting.")
         return
 
     vote_weight = 1
     voter_type = "Student"
+
     if st.checkbox("I am a Teacher/Principal (requires password)"):
         special_password = st.text_input("Enter special voting password:", type="password")
         if special_password == SPECIAL_VOTE_PASSWORD:
@@ -170,9 +172,10 @@ def voting_interface():
     candidates = load_candidates()
     symbols = load_candidate_symbols()
 
-    # Temporary dictionary to store votes during this session
-    local_votes = {}
+    # Temporary dictionary for this session's selections
+    local_votes = st.session_state.get("votes", {})
 
+    # Display each position and candidates
     for position, candidate_list in candidates.items():
         st.markdown(f"### {position}")
 
@@ -180,33 +183,38 @@ def voting_interface():
             st.success(f"✅ You have already voted for {position}")
             continue
 
-        selected_candidate = st.radio(f"Choose a candidate for {position}:", candidate_list, key=f"vote_{position}")
+        selected_candidate = st.radio(
+            f"Choose a candidate for {position}:",
+            candidate_list,
+            key=f"vote_{position}",
+            index=candidate_list.index(local_votes.get(position, candidate_list[0]))
+        )
 
-        # Show symbols
         for cand in candidate_list:
             if cand in symbols and os.path.exists(symbols[cand]):
                 st.image(symbols[cand], width=130)
 
-        skip_option = st.radio(f"Skip {position}?", ["No", "Yes"], key=f"skip_{position}")
+        skip_option = st.radio(
+            f"Skip {position}?",
+            ["No", "Yes"],
+            key=f"skip_{position}"
+        )
         if skip_option == "Yes":
             selected_candidate = "Skip this position"
 
-        # Store in local dictionary
+        # Save the choice in session state
         local_votes[position] = selected_candidate
 
-    # Update session state after loop
     st.session_state["votes"] = local_votes
 
-    # Cast all votes at once when clicking Complete Voting
+    # Button to complete voting
     if st.button("✅ Complete Voting"):
         for position, candidate in local_votes.items():
             if candidate != "Skip this position":
                 cast_vote(position, candidate, voter_id, vote_weight)
         st.session_state["voting_completed"] = True
         st.success("🎉 Thank you! Your votes have been recorded successfully!")
-        
-        # Only call rerun **once**, after all votes are cast
-        st.experimental_rerun()
+        # No rerun needed — Streamlit will update automatically
 
    
 def admin_panel():
@@ -452,6 +460,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
