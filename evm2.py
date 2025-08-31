@@ -193,20 +193,21 @@ def voting_interface():
     for position in candidates:
         st.write(f"### Select your {position}")
         
-        # Candidate options + skip
-options = candidates[position] + ["Skip this position"]
+                # Candidate options + skip
+        options = candidates[position] + ["Skip this position"]
 
-# Display candidates with images and radio in the same row
-selected_candidate = st.radio(
-    f"Select candidate for {position}:",
-    options,
-    key=f"{position}_choice",
-    label_visibility="collapsed"  # hide default label
-)
+        # Display candidates with images and radio in the same row
+        selected_candidate = st.radio(
+            f"Select candidate for {position}:",
+            options,
+            key=f"{position}_choice",
+            label_visibility="collapsed"  # hide default label
+        )
 
-# Show the selected candidate’s image inline
-if selected_candidate and selected_candidate in symbols:
-    st.image(symbols[selected_candidate], width=80)
+        # Show the selected candidate’s image inline
+        if selected_candidate and selected_candidate in symbols:
+            st.image(symbols[selected_candidate], width=80)
+
 
         
         # Save choice temporarily
@@ -468,6 +469,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
