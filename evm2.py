@@ -334,36 +334,34 @@ def manage_candidates():
 
 
 def manage_candidate_symbols():
-    st.subheader("🖼️ Candidate Symbols Management")
-    
-    candidates = load_candidates()
-    symbols = load_candidate_symbols()
-    
-    for position in candidates:
-        st.markdown(f"### {position}")
-        
-        for candidate in candidates[position]:
-            col1, col2, col3 = st.columns([3, 2, 2])
-            with col1:
-                st.write(candidate)
-            with col2:
-                if candidate in symbols and symbols[candidate]:
-                    st.image(symbols[candidate], width=80, caption="Current Symbol")
-                else:
-                    st.caption("No symbol added")
-            with col3:
-                uploaded_file = st.file_uploader(f"Upload symbol for {candidate}", 
-                                                 type=["png", "jpg", "jpeg"], 
-                                                 key=f"upload_{position}_{candidate}")
-                if uploaded_file is not None:
-                    os.makedirs("symbols", exist_ok=True)
-                    file_path = os.path.join("symbols", uploaded_file.name)
-                    with open(file_path, "wb") as f:
-                        f.write(uploaded_file.getbuffer())
-                    symbols[candidate] = file_path
-                    save_candidate_symbols(symbols)
-                    st.success(f"Added/Updated symbol for {candidate}")
-                    st.rerun()
+    st.subheader("Add Candidate Symbols")
+
+    candidates = load_candidates()   # ✅ load from your JSON
+
+    if not candidates:
+        st.info("No candidates found. Please add candidates first.")
+        return
+
+    for position, cand_list in candidates.items():
+        st.write(f"### {position}")   # show the position name
+        for cand in cand_list:
+            st.write(f"Candidate: {cand}")
+            uploaded_file = st.file_uploader(
+                f"Upload symbol for {cand}",
+                type=["png", "jpg", "jpeg"],
+                key=f"symbol_{position}_{cand}"
+            )
+            if uploaded_file is not None:
+                # Save to symbols folder
+                save_path = os.path.join("symbols", f"{cand}.png")
+                os.makedirs("symbols", exist_ok=True)
+                with open(save_path, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+                st.success(f"Symbol for {cand} uploaded successfully!")
+                # Update JSON mapping
+                symbols = load_candidate_symbols()
+                symbols[cand] = save_path
+                save_candidate_symbols(symbols)
 
 
 def view_results():
@@ -489,6 +487,7 @@ def display_candidate_symbol(candidate_name):
     symbols = load_candidate_symbols()
     if candidate_name in symbols and os.path.exists(symbols[candidate_name]):
         st.image(symbols[candidate_name], width=80, caption=candidate_name)
+
 
 
 
