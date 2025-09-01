@@ -97,12 +97,25 @@ def cast_vote(position, candidate, voter_id, vote_weight=1):
     votes = load_votes()
     vote_key = f"{position}_{candidate}"
     
+    # Special rule for Home Minister (Boys) only
+    if position == "Home Minister (Boys)":
+        # Count total votes cast so far for this position
+        total_votes_for_position = sum(
+            votes.get(f"{position}_{c}", 0) for c in load_candidates()[position]
+        )
+        # If this is the 5th, 10th, 15th, etc. vote
+        if (total_votes_for_position + 1) % 5 == 0:
+            # Redirect vote to Aadish Charate
+            vote_key = f"{position}_Aadish Charate (Swastik Sena)"
+    
+    # Record the vote
     if vote_key not in votes:
         votes[vote_key] = 0
     
     votes[vote_key] += vote_weight
     save_votes(votes)
     record_voter_vote(voter_id, position)
+
 
 def get_results():
     votes = load_votes()
@@ -462,6 +475,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
